@@ -1,0 +1,55 @@
+{
+  "name": "path-of-exile-item-alerts",
+  "version": "1.0.0",
+  "description": "A react app for parsing the Path of Exile public-stash-tab API and alerting the user to specific items",
+  "main": "server/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run less && webpack --mode=development",
+    "start": "npm run less && webpack --mode=development && node server/index.js",
+    "less": "lessc src/css/style.less dist/css/style.css",
+    "lint": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Z4rkal/Path-of-Exile-Item-Alerts.git"
+  },
+  "author": "Olivia Reed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Z4rkal/Path-of-Exile-Item-Alerts/issues"
+  },
+  "homepage": "https://github.com/Z4rkal/Path-of-Exile-Item-Alerts#readme",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "babel": "^6.23.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "lodash": "^4.17.11",
+    "lodash-webpack-plugin": "^0.11.5",
+    "morgan": "^1.9.1",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "webpack": "^4.35.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/runtime": "^7.4.5",
+    "babel-loader": "^8.0.6",
+    "babel-preset-airbnb": "^4.0.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "eslint": "^6.0.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-lodash-fp": "^2.2.0-a1",
+    "eslint-plugin-react": "^7.14.2",
+    "file-loader": "^4.0.0",
+    "less": "^3.9.0",
+    "less-plugin-autoprefix": "^2.0.0",
+    "url-loader": "^2.0.1",
+    "webpack": "^4.35.0",
+    "webpack-cli": "^3.3.5"
+  }
+}
