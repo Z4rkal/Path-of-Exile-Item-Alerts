@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const axios = require('axios');
+const DataHandler = require('./DataHandler');
 
 const app = express();
 
@@ -11,12 +11,14 @@ app.use(bodyParser.json());
 app.use(express.static('dist'));
 app.use(express.static('public'));
 
-app.get('/api/',(req,res) => {
-    axios.get('https://www.pathofexile.com/api/public-stash-tabs')
-    .then(response => {res.json(response.data); console.log('Should return data.')});
+const Data = new DataHandler();
+Data.spinUp();
+
+app.get('/api/', (req, res) => {
+    res.send(Data.getData);
 });
 
-app.get('.*', (req,res) => {
+app.get('.*', (req, res) => {
     res.status(404).send('404: Resource not found.');
 });
 
