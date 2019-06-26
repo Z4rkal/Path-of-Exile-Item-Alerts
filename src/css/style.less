@@ -1,0 +1,14 @@
+body {
+    background-image: repeating-linear-gradient(to left,#55c8d8, #f7c8d8, #f7c8d8, #ffffff, #ffffff, #f7c8d8, #f7c8d8, #55c8d8);
+    background-size: 300%;
+    min-height: 100vh;
+
+    animation-name: shift;
+    animation-duration: 30s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes shift {
+    0% {background-position: 0%;}
+    100% {background-position: 300%;}
+    }

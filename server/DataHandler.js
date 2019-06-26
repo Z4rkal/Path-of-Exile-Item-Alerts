@@ -5,14 +5,14 @@ class DataHandler {
         this.ready = true;
         this.league = null;
         this.refreshRate = 1000 * 4; //4 seconds
-        this.watchFor = `Voidfletcher`;
+        this.watchFor = null;
 
         this.stashTabs = {};
         this.stashesToParse = null;
-        this.nextChangeId = `423736660-439696015-414223782-475329009-450825155`;
+        this.nextChangeId = null;
         this.nextData = { added: [], removed: [] };
 
-        this.getLeague();
+        this.fetchCurrentLeague();
     }
 
     get getAllData() {
@@ -31,13 +31,33 @@ class DataHandler {
         console.log(`The current league is ${this.league}`);
     }
 
-    set setWatch(params) {
-        this.watchFor = params;
+    set setId(Id) {
+        this.nextChangeId = Id;
+        console.log(`The next change ID is: ${this.nextChangeId}`);
     }
 
-    getLeague() {
+    set setWatch(params) {
+        this.watchFor = params;
+        this.nextData = { added: [], removed: [] };
+        this.stashTabs = {};
+
+        this.getFreshId();
+    }
+
+    get getWatch() {
+        if (this.watchFor != null)
+            return this.watchFor;
+        return 'Not currently searching for anything :(';
+    }
+
+    fetchCurrentLeague() {
         axios.get('https://api.pathofexile.com/leagues?type=main&offset=4&compact=1&limit=1')
-            .then(response => this.setLeague = response.data[0].id);
+            .then(response => this.setLeague = response.data[0].id, error => console.log(error));
+    }
+
+    getFreshId() {
+        axios.get('https://api.poe.watch/id')
+            .then(response => this.setId = response.data.id, error => console.log(error));
     }
 
     //Method Prototypes
@@ -46,17 +66,11 @@ class DataHandler {
     }
 
     getStashData(nextChangeId) {
-        if (this.ready) {
+        if (this.ready && this.watchFor != null && this.nextChangeId != null) {
             this.ready = false;
             console.log(`Making GET request to ${`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`}`);
-            if (nextChangeId == null) {
-                axios.get('https://www.pathofexile.com/api/public-stash-tabs')
-                    .then(response => this.ready = this.parseNewData(response.data));
-            }
-            else {
-                axios.get(`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`)
-                    .then(response => this.ready = this.parseNewData(response.data));
-            }
+            axios.get(`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`)
+                .then(response => this.ready = this.parseNewData(response.data));
         }
     }
 
@@ -84,6 +98,7 @@ class DataHandler {
         tab.items.forEach((element) => {
             if (element.name == this.watchFor) {
                 newTab.matches[element.id] = {
+                    id: element.id,
                     name: element.name,
                     icon: element.icon,
                     ilvl: element.ilvl,
@@ -91,7 +106,7 @@ class DataHandler {
                     flavour: element.flavourText,
                     note: element.note != undefined ? element.note : 'N/A'
                 }
-                this.pushToNext({ acct: newTab.owner, char: newTab.lastChar, name: newTab.name, item: newTab.matches[element.id] }, 'add');
+                this.pushToNext({ id: element.id, acct: newTab.owner, char: newTab.lastChar, name: newTab.name, item: newTab.matches[element.id] }, 'add');
             }
         })
         if (Object.entries(newTab.matches).length != 0)
@@ -106,6 +121,7 @@ class DataHandler {
         tab.items.forEach((element) => {
             if (element.name == this.watchFor) {
                 curTab.matches[element.id] = {
+                    id: element.id,
                     name: element.name,
                     icon: element.icon,
                     ilvl: element.ilvl,
@@ -114,12 +130,12 @@ class DataHandler {
                     note: element.note != undefined ? element.note : 'N/A'
                 }
                 if (oldItems[element.id] == undefined)
-                    this.pushToNext({ acct: curTab.owner, char: curTab.lastChar, name: curTab.name, item: curTab.matches[element.id] }, 'add');
+                    this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, name: curTab.name, item: curTab.matches[element.id] }, 'add');
             }
 
             oldItems.entries.forEach((element) => {
                 if (curTab.matches[element.id] == undefined)
-                    this.pushToNext({ acct: curTab.owner, char: curTab.lastChar, name: curTab.name, item: curTab.matches[element.id] }, 'remove');
+                    this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, name: curTab.name, item: curTab.matches[element.id] }, 'remove');
             })
         })
         if (Object.entries(curTab.matches).length != 0)
