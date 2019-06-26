@@ -15,7 +15,7 @@ const Data = new DataHandler();
 Data.spinUp();
 
 app.get('/api/', (req, res) => {
-    res.send(Data.getData);
+    res.send(Data.getAllData);
 });
 
 app.get('.*', (req, res) => {
