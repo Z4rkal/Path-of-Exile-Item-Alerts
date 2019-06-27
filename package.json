@@ -8,7 +8,8 @@
     "build": "npm run less && webpack --mode=development",
     "start": "npm run less && webpack --mode=development && node server/index.js",
     "less": "lessc src/css/style.less dist/css/style.css",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "now-build": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -23,12 +24,12 @@
   "dependencies": {
     "axios": "^0.19.0",
     "babel": "^6.23.0",
-    "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "lodash": "^4.17.11",
     "lodash-webpack-plugin": "^0.11.5",
     "morgan": "^1.9.1",
     "react": "^16.8.6",
+    "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.8.6",
     "webpack": "^4.35.0"
   },

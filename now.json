@@ -1,0 +1,15 @@
+{
+    "version": 2,
+    "public": false,
+    "builds": [
+      { "src": "package.json", "use": "@now/static-build" },
+      { "src": "/server/index.js", "use": "@now/node-server" },
+      { "src": "/public/**/*", "use": "@now/static"}
+    ],
+    "routes": [
+      { "src": "/api/.*", "dest": "/server/index.js" },
+      { "src": ".*bundle.js", "dest": "/bundle.js" },
+      { "src": ".*css/style.css", "dest": "/css/style.css"},
+      { "src": ".*", "dest": "/public/index.html" }
+    ]
+  }

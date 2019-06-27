@@ -1,12 +1,10 @@
 const express = require('express');
 const morgan = require('morgan');
-const bodyParser = require('body-parser');
 const DataHandler = require('./DataHandler');
 
 const app = express();
 
 app.use(morgan('dev'));
-app.use(bodyParser.json());
 
 app.use(express.static('dist'));
 app.use(express.static('public'));
@@ -20,6 +18,10 @@ app.get('/api/all', (req, res) => {
 
 app.get('/api/cur', (req, res) => {
     res.send(Data.getData);
+});
+
+app.get('/api/league', (req,res) => {
+    res.send(Data.getLeague);
 });
 
 app.post('/api/search', (req, res) => {

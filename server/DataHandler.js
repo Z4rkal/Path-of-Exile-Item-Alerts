@@ -4,7 +4,7 @@ class DataHandler {
     constructor() {
         this.ready = true;
         this.league = null;
-        this.refreshRate = 1000 * 4; //4 seconds
+        this.refreshRate = 1000 * 1; //1 second between checking if we're ready to get the next chunk of stash tabs
         this.watchFor = null;
 
         this.stashTabs = {};
@@ -31,6 +31,10 @@ class DataHandler {
         console.log(`The current league is ${this.league}`);
     }
 
+    get getLeague() {
+        return this.league;
+    }
+
     set setId(Id) {
         this.nextChangeId = Id;
         console.log(`The next change ID is: ${this.nextChangeId}`);
@@ -50,6 +54,7 @@ class DataHandler {
         return 'Not currently searching for anything :(';
     }
 
+    //Method Prototypes
     fetchCurrentLeague() {
         axios.get('https://api.pathofexile.com/leagues?type=main&offset=4&compact=1&limit=1')
             .then(response => this.setLeague = response.data[0].id, error => console.log(error));
@@ -60,7 +65,6 @@ class DataHandler {
             .then(response => this.setId = response.data.id, error => console.log(error));
     }
 
-    //Method Prototypes
     spinUp() {
         setInterval(() => this.getStashData(this.nextChangeId), this.refreshRate);
     }
@@ -94,7 +98,7 @@ class DataHandler {
     }
 
     parseNewTab(tab) {
-        let newTab = { id: tab.id, owner: tab.accountName, lastChar: tab.lastCharacterName, name: tab.stash, matches: {} }
+        let newTab = { id: tab.id, owner: tab.accountName, lastChar: tab.lastCharacterName, stashName: tab.stash, matches: {} }
         tab.items.forEach((element) => {
             if (element.name == this.watchFor) {
                 newTab.matches[element.id] = {
@@ -102,15 +106,20 @@ class DataHandler {
                     name: element.name,
                     icon: element.icon,
                     ilvl: element.ilvl,
-                    modifiers: { implicit: element.implicitMods, explicit: element.explicitMods },
-                    flavour: element.flavourText,
+                    corrupted: element.corrupted != undefined ? element.corrupted : false,
+                    modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
+                    position: [element.x, element.y],
                     note: element.note != undefined ? element.note : 'N/A'
                 }
-                this.pushToNext({ id: element.id, acct: newTab.owner, char: newTab.lastChar, name: newTab.name, item: newTab.matches[element.id] }, 'add');
+                this.pushToNext({ id: element.id, acct: newTab.owner, char: newTab.lastChar, stashName: newTab.stashName, item: newTab.matches[element.id] }, 'add');
             }
         })
-        if (Object.entries(newTab.matches).length != 0)
+        if (Object.entries(newTab.matches).length != 0 && Object.entries(this.stashTabs).length < 50)
             this.stashTabs[tab.id] = newTab;
+        else if (Object.entries(this.stashTabs).length == 50) {
+            this.stashTabs[Object.entries(this.stashTabs)[0][1].id] = undefined;
+            this.stashTabs[tab.id] = newTab;
+        }
     }
 
     parseUpdatedTab(tab) {
@@ -125,17 +134,18 @@ class DataHandler {
                     name: element.name,
                     icon: element.icon,
                     ilvl: element.ilvl,
-                    modifiers: { implicit: element.implicitMods, explicit: element.explicitMods },
-                    flavour: element.flavourText,
+                    corrupted: element.corrupted != undefined ? element.corrupted : false,
+                    modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
+                    position: [element.x, element.y],
                     note: element.note != undefined ? element.note : 'N/A'
                 }
                 if (oldItems[element.id] == undefined)
-                    this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, name: curTab.name, item: curTab.matches[element.id] }, 'add');
+                    this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
             }
 
-            oldItems.entries.forEach((element) => {
+            Object.entries(oldItems).forEach(([, element]) => {
                 if (curTab.matches[element.id] == undefined)
-                    this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, name: curTab.name, item: curTab.matches[element.id] }, 'remove');
+                    this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'remove');
             })
         })
         if (Object.entries(curTab.matches).length != 0)
