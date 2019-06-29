@@ -7,9 +7,9 @@
       { "src": "/public/**/*", "use": "@now/static"}
     ],
     "routes": [
-      { "src": "/api/.*", "dest": "/server/index.js" },
+      { "src": "/api/.*", "dest": "/server/index.js", "methods": ["POST","GET"] },
       { "src": ".*bundle.js", "dest": "/bundle.js" },
       { "src": ".*css/style.css", "dest": "/css/style.css"},
-      { "src": ".*", "dest": "/public/index.html" }
+      { "src": "/$", "dest": "/public/index.html" }
     ]
   }

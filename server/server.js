@@ -29,7 +29,7 @@ app.post('/api/search', (req, res) => {
         Data.setWatch = decodeURI(/id\=([^\&]+)/.exec(req.url)[1]);
         res.status(200).send(`Received request to begin searching for '${Data.getWatch}'`);
     }
-    catch {
+    catch (err) {
         console.log(`Invalid post at from ${req.url}`);
     }
     //console.log(/id\=([^\&]+)/.exec(req.url));
