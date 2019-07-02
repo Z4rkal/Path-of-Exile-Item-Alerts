@@ -109,7 +109,8 @@ class DataHandler {
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y],
-                    note: element.note != undefined ? element.note : 'N/A'
+                    note: element.note != undefined ? element.note : 'N/A',
+                    time: new Date().getTime()
                 }
                 this.pushToNext({ id: element.id, acct: newTab.owner, char: newTab.lastChar, stashName: newTab.stashName, item: newTab.matches[element.id] }, 'add');
             }
@@ -117,7 +118,7 @@ class DataHandler {
         if (Object.entries(newTab.matches).length != 0 && Object.entries(this.stashTabs).length < 50)
             this.stashTabs[tab.id] = newTab;
         else if (Object.entries(this.stashTabs).length == 50) {
-            this.stashTabs[Object.entries(this.stashTabs)[0][1].id] = undefined;
+            delete this.stashTabs[Object.entries(this.stashTabs)[0][1].id]; // = undefined;
             this.stashTabs[tab.id] = newTab;
         }
     }
@@ -137,7 +138,8 @@ class DataHandler {
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y],
-                    note: element.note != undefined ? element.note : 'N/A'
+                    note: element.note != undefined ? element.note : 'N/A',
+                    time: new Date().getTime()
                 }
                 if (oldItems[element.id] == undefined)
                     this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
@@ -151,7 +153,7 @@ class DataHandler {
         if (Object.entries(curTab.matches).length != 0)
             this.stashTabs[tab.id] = curTab;
         else
-            this.stashTabs[tab.id] = undefined;
+            delete this.stashTabs[tab.id]; // = undefined;
     }
 
     pushToNext(item, option) {
