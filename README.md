@@ -9,3 +9,5 @@ You can then download the dependencies with `npm install` and then build and lau
 The server listens on port 3000, so you can access the web page it serves at `localhost:3000`.
 
 A working example of the project is deployed on [Now](https://path-of-exile-item-alerts.zarkal.now.sh/).
+
+This branch exists as a historical copy of the work I had completed by the end of the hackathon.
