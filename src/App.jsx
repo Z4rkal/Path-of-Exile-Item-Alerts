@@ -24,10 +24,10 @@ class App extends Component {
 
     componentWillMount() {
         axios.get('/api/league')
-            .then(response => this.setState({ league: response.data }), error => console.log(`Couldn't reach server for current League`));
+            .then(response => this.setState({ league: response.data }), error => /*console.log(error)*/'');
 
         axios.get('/api/all')
-            .then(response => this.initializeData(response.data), error => console.log(`Couldn't reach server for old data`));
+            .then(response => this.initializeData(response.data), error => /*console.log(error)*/'');
 
         let serverRef = setInterval(() => axios.get('/api/cur').then(response => this.handleNewData(response.data), error => { clearInterval(serverRef); console.log(`Can't reach server, aborting asking for new data`) }), 1000 * 4);
     }
@@ -71,7 +71,7 @@ class App extends Component {
         else {
             let data = {};
             this.setState({ data: data });
-            axios.post(`/api/search?id=${this.state.search}`, 'Hewwo mxs sewver').then(response => console.log(response.data), error => console.log(error));
+            axios.post(`/api/search?id=${this.state.search}`, 'Hewwo mxs sewver').then(response => console.log(response.data), error => console.log(`Failed to submit new search criteria to the server.`));
         }
     }
 
