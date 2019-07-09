@@ -1,4 +1,5 @@
 const axios = require('axios');
+const formatPrice = require('./formatPrice');
 
 class DataHandler {
     constructor() {
@@ -57,12 +58,12 @@ class DataHandler {
     //Method Prototypes
     fetchCurrentLeague() {
         axios.get('https://api.pathofexile.com/leagues?type=main&offset=4&compact=1&limit=1')
-            .then(response => this.setLeague = response.data[0].id, error => console.log(error));
+            .then(response => this.setLeague = response.data[0].id, error => console.log('Failed to get the current league'));
     }
 
     getFreshId() {
         axios.get('https://api.poe.watch/id')
-            .then(response => this.setId = response.data.id, error => console.log(error));
+            .then(response => this.setId = response.data.id, error => console.log('Failed to get the current chunk id from poe.watch'));
     }
 
     spinUp() {
@@ -74,7 +75,7 @@ class DataHandler {
             this.ready = false;
             console.log(`Making GET request to ${`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`}`);
             axios.get(`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`)
-                .then(response => this.ready = this.parseNewData(response.data));
+                .then(response => this.ready = this.parseNewData(response.data), error => console.log('Failed to get stash data'));
         }
     }
 
@@ -109,7 +110,7 @@ class DataHandler {
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y],
-                    note: element.note != undefined ? element.note : 'N/A',
+                    note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
                     time: new Date().getTime()
                 }
                 this.pushToNext({ id: element.id, acct: newTab.owner, char: newTab.lastChar, stashName: newTab.stashName, item: newTab.matches[element.id] }, 'add');
@@ -138,7 +139,7 @@ class DataHandler {
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y],
-                    note: element.note != undefined ? element.note : 'N/A',
+                    note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
                     time: new Date().getTime()
                 }
                 if (oldItems[element.id] == undefined)

@@ -42,41 +42,13 @@ class Item extends Component {
         this.makeWhisper(this.props.listing);
     }
 
-    extractPrice(note) {
-        let result = '';
-        let price = /([0-9\.]+) ([a-z]+)/i;
-        //let currencyType = /alt|chance|alch|fuse|vaal|chaos|exa/i;
-
-        if (price.test(note)) {
-            let extractPrice = price.exec(note);
-
-            result += extractPrice[1];
-            result += ' ' + extractPrice[2];
-            return result;
-        }
-        else return 'Price: N/A';
-    }
-
-    formatPrice(note) {
-        let result = '';
-        if (/N\/A/.test(note)) return 'Price: N/A';
-
-        let listingType = /b\\\/o/;
-        if (listingType.test(note)) result = 'Fixed price: ';
-        else result = 'Asking price: '
-
-        result += this.extractPrice(note);
-
-        return result;
-    }
-
     makeWhisper(listing) {
         if (listing == null || listing == undefined) return null;
         //console.log(listing.stashName);
 
         //Reference whisper taken from a poe.trade search, it's important to stick to their whisper format
         //'@GrazynaZeSzczecina Hi, I would like to buy your Hypnotic Twirl Paua Ring listed for 1 alteration in Legion (stash tab "S"; position: left 1, top 2)'
-        let result = `@${listing.char} Hi, I would like to buy your ${listing.item.name} ${listing.item.note != 'N/A' && this.extractPrice(listing.item.note) != 'Price: N/A' ? `listed for ${this.extractPrice(listing.item.note)} ` : ``} in ${this.props.league}${listing.stashName != undefined && listing.item.position != undefined ? ` (stash tab "${listing.stashName}"; position: left ${listing.item.position[0]}, top ${listing.item.position[1]})` : ``}`
+        let result = `@${listing.char} Hi, I would like to buy your ${listing.item.name} ${listing.item.note != 'Price: N/A' ? `listed for ${/[0-9]+ [a-z]+$/i.exec(listing.item.note)[0]} ` : ``} in ${this.props.league}${listing.stashName != undefined && listing.item.position != undefined ? ` (stash tab "${listing.stashName}"; position: left ${listing.item.position[0]}, top ${listing.item.position[1]})` : ``}`
 
         this.setState({ whisper: result });
     }
@@ -103,7 +75,7 @@ class Item extends Component {
                         </div>
                         <div className='row'>
                             <div className='col-xs-12'>
-                                <p style={{ marginTop: '1rem' }}>{this.formatPrice(this.props.listing.item.note)} | IGN: {this.props.listing.char} | <a href={`https://www.pathofexile.com/account/view-profile/${this.props.listing.acct}`} style={{ color: '#ff4444' }}>Profile</a>{this.state.whisper != null ? (<span> | <CopyToClipboard text={this.state.whisper} onCopy={() => this.setState({ copied: true })}>{this.state.copied == false ? <span style={{ color: '#ff4444' }}>Whisper</span> : <span style={{ color: '#ff4444' }}>Copied to Clipboard</span>}</CopyToClipboard></span>) : null}</p>
+                                <p style={{ marginTop: '1rem' }}>{this.props.listing.item.note} | IGN: {this.props.listing.char} | <a href={`https://www.pathofexile.com/account/view-profile/${this.props.listing.acct}`} style={{ color: '#ff4444' }}>Profile</a>{this.state.whisper != null ? (<span> | <CopyToClipboard text={this.state.whisper} onCopy={() => this.setState({ copied: true })}>{this.state.copied == false ? <span style={{ color: '#ff4444' }}>Whisper</span> : <span style={{ color: '#ff4444' }}>Copied to Clipboard</span>}</CopyToClipboard></span>) : null}</p>
                             </div>
                         </div>
                     </div>

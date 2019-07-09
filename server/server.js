@@ -1,6 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
-const DataHandler = require('./DataHandler');
+const DataHandler = require('./lib/DataHandler');
 
 const app = express();
 
