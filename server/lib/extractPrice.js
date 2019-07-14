@@ -3,7 +3,6 @@ const curTypes = Object.entries(require('./currencyTypes'));
 function extractPrice(note) {
     let result = '';
     let price = /([0-9\.]+) ([a-z]+)$/i;
-    //let currencyType = /alt|chance|alch|fuse|vaal|chaos|exa/i;
 
     if (price.test(note)) {
         let extractPrice = price.exec(note);

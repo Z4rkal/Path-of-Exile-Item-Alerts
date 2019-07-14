@@ -1,5 +1,7 @@
 const axios = require('axios');
 const formatPrice = require('./formatPrice');
+const getCurrencyData = require('./getCurrencyData');
+const calculateRawValue = require('./calculateRawValue');
 
 class DataHandler {
     constructor() {
@@ -13,7 +15,10 @@ class DataHandler {
         this.nextChangeId = null;
         this.nextData = { added: [], removed: [] };
 
-        this.fetchCurrentLeague();
+        this.cData = 'No currency data :(';
+
+        this.fetchCurrentLeague().then(resolve => this.handleCurrencyData());
+
     }
 
     get getAllData() {
@@ -55,10 +60,27 @@ class DataHandler {
         return 'Not currently searching for anything :(';
     }
 
+    get getCData() {
+        return this.cData;
+    }
     //Method Prototypes
     fetchCurrentLeague() {
-        axios.get('https://api.pathofexile.com/leagues?type=main&offset=4&compact=1&limit=1')
+        return axios.get('https://api.pathofexile.com/leagues?type=main&offset=4&compact=1&limit=1')
             .then(response => this.setLeague = response.data[0].id, error => console.log('Failed to get the current league'));
+    }
+
+    async handleCurrencyData() {
+
+        if (this.league == null) {
+            this.cData = 'No currency data :(';
+        }
+        else {
+            //Get the initial currency data from api.poe.watch
+            this.cData = await getCurrencyData(this.league);
+            
+            // //Update every two hours
+            // setInterval(this.cData = getCurrencyData(this.league), 1000 * 60 * 60 * 2);
+        }
     }
 
     getFreshId() {
@@ -75,12 +97,11 @@ class DataHandler {
             this.ready = false;
             console.log(`Making GET request to ${`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`}`);
             axios.get(`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`)
-                .then(response => this.ready = this.parseNewData(response.data), error => console.log('Failed to get stash data'));
+                .then(response => this.ready = this.parseNewData(response.data), error => {console.log('Failed to get stash data'); this.ready = true;});
         }
     }
 
     parseNewData(data) {
-        //console.log(data);
         console.log(`Next change ID: ${data.next_change_id}`);
         if (this.nextChangeId == null || this.nextChangeId != data.next_change_id) {
             this.nextChangeId = data.next_change_id;
@@ -111,7 +132,8 @@ class DataHandler {
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y],
                     note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
-                    time: new Date().getTime()
+                    time: new Date().getTime(),
+                    chaos: element.note != undefined ? calculateRawValue(element.note,this.cData) : 'N/A'
                 }
                 this.pushToNext({ id: element.id, acct: newTab.owner, char: newTab.lastChar, stashName: newTab.stashName, item: newTab.matches[element.id] }, 'add');
             }
@@ -140,7 +162,8 @@ class DataHandler {
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y],
                     note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
-                    time: new Date().getTime()
+                    time: new Date().getTime(),
+                    chaos: element.note != undefined ? calculateRawValue(element.note,this.cData) : 'N/A'
                 }
                 if (oldItems[element.id] == undefined)
                     this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');

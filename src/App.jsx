@@ -9,7 +9,8 @@ class App extends Component {
         this.state = {
             search: '',
             league: '',
-            data: {}
+            data: {},
+            sortStyle: 'age'
         }
 
         this.updateInput = this.updateInput.bind(this);
@@ -84,7 +85,12 @@ class App extends Component {
                     updateInput={this.updateInput}
                     handleSubmit={this.handleSubmit}
                 />
-                <Output league={this.state.league} results={this.state.data} />
+                <Output
+                    league={this.state.league}
+                    results={this.state.data}
+                    updateInput={this.updateInput}
+                    sortStyle={this.state.sortStyle}
+                />
             </div>
         )
     }

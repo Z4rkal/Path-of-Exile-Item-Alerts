@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const DataHandler = require('./lib/DataHandler');
+const getCurrencyData = require('./lib/getCurrencyData');
 
 const app = express();
 
@@ -20,8 +21,12 @@ app.get('/api/cur', (req, res) => {
     res.send(Data.getData);
 });
 
-app.get('/api/league', (req,res) => {
+app.get('/api/league', (req, res) => {
     res.send(Data.getLeague);
+});
+
+app.get('/api/cdata', (req, res) => {
+    res.send(Data.getCData);
 });
 
 app.post('/api/search', (req, res) => {
