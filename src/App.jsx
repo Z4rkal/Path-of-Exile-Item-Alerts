@@ -10,7 +10,8 @@ class App extends Component {
             search: '',
             league: '',
             data: {},
-            sortStyle: 'age'
+            sortStyle: 'age',
+            mod: { text: '', pattern: /^$/, numVals: 0, type: '' }
         }
 
         this.updateInput = this.updateInput.bind(this);
@@ -90,6 +91,7 @@ class App extends Component {
                     results={this.state.data}
                     updateInput={this.updateInput}
                     sortStyle={this.state.sortStyle}
+                    mod={this.state.mod}
                 />
             </div>
         )

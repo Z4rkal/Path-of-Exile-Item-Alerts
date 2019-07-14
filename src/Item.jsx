@@ -1,32 +1,7 @@
 import React, { Component } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import formatTime from './lib/formatTime';
-
-class ItemMods extends Component {
-    render() {
-        return (
-            <table style={{ marginLeft: '1.4rem' }}>
-                <tbody>
-                    {this.props.modifiers.implicit != undefined ? this.props.modifiers.implicit.map((element, index) => (
-                        <tr key={this.props.id + ' ' + element + index}>
-                            <th>{element}</th>
-                        </tr>
-                    )) : null}
-                    {this.props.modifiers.explicit != undefined ? this.props.modifiers.explicit.map((element, index) => (
-                        <tr key={this.props.id + ' ' + element + index}>
-                            <td>{element}</td>
-                        </tr>
-                    )) : null}
-                    {this.props.modifiers.crafted != undefined ? this.props.modifiers.crafted.map((element, index) => (
-                        <tr key={this.props.id + ' ' + element + index}>
-                            <td><span style={{ backgroundColor: '#55c3d3', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>Crafted</span> {element}</td>
-                        </tr>
-                    )) : null}
-                </tbody>
-            </table>
-        )
-    }
-}
+import ItemMods from './ItemMods';
 
 class Item extends Component {
     constructor(props) {
@@ -66,16 +41,16 @@ class Item extends Component {
                         <div className='row'>
                             <div className='col-xs-12'>
                                 <div className='row'>
-                                    <p className='col-xs-8'>{this.props.listing.item.corrupted ? (<span style={{ backgroundColor: '#ff6666', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>Corrupted</span>) : null}{this.props.listing.item.name}</p><p style={{textAlign: 'right'}} className='col-xs-4'>{formatTime(this.props.listing.item.time)}</p>
+                                    <p className='col-xs-8'>{this.props.listing.item.corrupted ? (<span style={{ backgroundColor: '#ff6666', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>Corrupted</span>) : null}{this.props.listing.item.name}</p><p style={{ textAlign: 'right' }} className='col-xs-4' onClick={() => { this.props.updateInput('sortStyle', 'age'); this.props.updateInput('mod', { text: '', pattern: /^$/, numVals: 0, type: '' }); }}><span className='hover'>{formatTime(this.props.listing.item.time)}</span></p>
                                 </div>
                             </div>
                         </div>
                         <div className='row'>
-                            <ItemMods id={this.props.listing.id} modifiers={this.props.listing.item.modifiers} />
+                            <ItemMods id={this.props.listing.id} modifiers={this.props.listing.item.modifiers} updateInput={this.props.updateInput} mod={this.props.mod} />
                         </div>
                         <div className='row'>
                             <div className='col-xs-12'>
-                                <p style={{ marginTop: '1rem' }}>{this.props.listing.item.note} | IGN: {this.props.listing.char} | <a href={`https://www.pathofexile.com/account/view-profile/${this.props.listing.acct}`} style={{ color: '#ff4444' }}>Profile</a>{this.state.whisper != null ? (<span> | <CopyToClipboard text={this.state.whisper} onCopy={() => this.setState({ copied: true })}>{this.state.copied == false ? <span style={{ color: '#ff4444' }}>Whisper</span> : <span style={{ color: '#ff4444' }}>Copied to Clipboard</span>}</CopyToClipboard></span>) : null}</p>
+                                <p style={{ marginTop: '1rem' }}><span className='hover' onClick={() => { this.props.updateInput('sortStyle', 'price'); this.props.updateInput('mod', { text: '', pattern: /^$/, numVals: 0, type: '' }); }}>{this.props.listing.item.note}</span> | IGN: {this.props.listing.char} | <a href={`https://www.pathofexile.com/account/view-profile/${this.props.listing.acct}`} style={{ color: '#ff4444' }}>Profile</a>{this.state.whisper != null ? (<span> | <CopyToClipboard text={this.state.whisper} onCopy={() => this.setState({ copied: true })}>{this.state.copied == false ? <span style={{ color: '#ff4444' }}>Whisper</span> : <span style={{ color: '#ff4444' }}>Copied to Clipboard</span>}</CopyToClipboard></span>) : null}</p>
                             </div>
                         </div>
                     </div>

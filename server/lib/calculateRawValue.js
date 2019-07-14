@@ -15,9 +15,9 @@ function calculateRawValue(note, cData) {
 
     let res = 'N/A';
 
-    cData.forEach((e) => {
-        if (e.name == type || e.name == type.slice(0, type.length - 1)) res = Math.fround(value * e.median);
-    });
+        cData.forEach((e) => {
+            if (e.name == type || e.name == type.slice(0, type.length - 1)) res = Math.fround(value * e.median);
+        });
 
     return res;
 }

@@ -3,6 +3,7 @@ const formatPrice = require('./formatPrice');
 const getCurrencyData = require('./getCurrencyData');
 const calculateRawValue = require('./calculateRawValue');
 
+//This class will handle all of the item and currency data for the server
 class DataHandler {
     constructor() {
         this.ready = true;
@@ -51,7 +52,8 @@ class DataHandler {
         this.nextData = { added: [], removed: [] };
         this.stashTabs = {};
 
-        this.getFreshId();
+        if (this.nextChangeId == null)
+            this.getFreshId();
     }
 
     get getWatch() {
@@ -77,9 +79,13 @@ class DataHandler {
         else {
             //Get the initial currency data from api.poe.watch
             this.cData = await getCurrencyData(this.league);
-            
-            // //Update every two hours
-            // setInterval(this.cData = getCurrencyData(this.league), 1000 * 60 * 60 * 2);
+
+            //Update every 12 hours
+            setInterval(async () => {
+                let nData;
+                nData = await getCurrencyData(this.league);
+                if (nData != 'No Currency Data :(') this.cData = nData;
+            }, 1000 * 60 * 60 * 12);
         }
     }
 
@@ -97,7 +103,7 @@ class DataHandler {
             this.ready = false;
             console.log(`Making GET request to ${`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`}`);
             axios.get(`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`)
-                .then(response => this.ready = this.parseNewData(response.data), error => {console.log('Failed to get stash data'); this.ready = true;});
+                .then(response => this.ready = this.parseNewData(response.data), error => { console.log('Failed to get stash data'); this.ready = true; });
         }
     }
 
@@ -133,7 +139,7 @@ class DataHandler {
                     position: [element.x, element.y],
                     note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
                     time: new Date().getTime(),
-                    chaos: element.note != undefined ? calculateRawValue(element.note,this.cData) : 'N/A'
+                    chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
                 }
                 this.pushToNext({ id: element.id, acct: newTab.owner, char: newTab.lastChar, stashName: newTab.stashName, item: newTab.matches[element.id] }, 'add');
             }
@@ -163,7 +169,7 @@ class DataHandler {
                     position: [element.x, element.y],
                     note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
                     time: new Date().getTime(),
-                    chaos: element.note != undefined ? calculateRawValue(element.note,this.cData) : 'N/A'
+                    chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
                 }
                 if (oldItems[element.id] == undefined)
                     this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
