@@ -9,11 +9,11 @@ function extractPrice(note) {
 
         result += extractPrice[1];
 
-        for (let i = 0; i < curTypes.length; i++) {
-            if (curTypes[i][1].test(extractPrice[2])) {
-                result += ' ' + curTypes[i][0] + (extractPrice[1] != '1' && curTypes[i][0][curTypes[i][0].length - 1] != 's' ? 's' : '');
-                return result;
-            }
+        const type = curTypes.find((e) => e[1].test(extractPrice[2]));
+
+        if (type != undefined && type != null) {
+            result += ' ' + type[0] + (extractPrice[1] != '1' && type[0][type[0].length - 1] != 's' ? 's' : '');
+            return result;
         }
     }
 

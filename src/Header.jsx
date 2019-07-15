@@ -23,3 +23,15 @@ class Header extends Component {
 }
 
 export default Header;
+
+//Advanced search wireframe?
+/*
+    Button to expand header to include more than just a name field
+        -field for type and base
+        -field for links and sockets
+        -field for stats?
+
+        -field for modifier groups
+        
+        -options for corrupted, shaped, elder, ilvl, quality, price, etc.
+*/

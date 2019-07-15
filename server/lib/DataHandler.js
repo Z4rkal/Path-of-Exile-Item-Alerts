@@ -125,6 +125,7 @@ class DataHandler {
         return true;
     }
 
+    //Currently this function and parseUpdatedTab are matching items by name, TODO: Update them to handle more advanced search parameters once the front end can send back more than an item name
     parseNewTab(tab) {
         let newTab = { id: tab.id, owner: tab.accountName, lastChar: tab.lastCharacterName, stashName: tab.stash, matches: {} }
         tab.items.forEach((element) => {
