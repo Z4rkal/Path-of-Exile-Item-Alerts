@@ -1,0 +1,2 @@
+//Response object returned from the GGG API (https://api.pathofexile.com/leagues?type=main&offset=4&compact=1&limit=1) during legion league on 7/16/19
+module.exports = [{"id":"Legion","realm":"pc","url":"http:\/\/pathofexile.com\/forum\/view-thread\/2515509","startAt":"2019-06-07T20:00:00Z","endAt":"2019-09-02T22:00:00Z","delveEvent":true}];

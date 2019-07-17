@@ -12,14 +12,12 @@ class DataHandler {
         this.watchFor = null;
 
         this.stashTabs = {};
-        this.stashesToParse = null;
         this.nextChangeId = null;
         this.nextData = { added: [], removed: [] };
 
         this.cData = 'No currency data :(';
 
         this.fetchCurrentLeague().then(resolve => this.handleCurrencyData());
-
     }
 
     get getAllData() {
@@ -53,7 +51,7 @@ class DataHandler {
         this.stashTabs = {};
 
         if (this.nextChangeId == null)
-            this.getFreshId();
+            return this.getFreshId();
     }
 
     get getWatch() {
@@ -65,6 +63,13 @@ class DataHandler {
     get getCData() {
         return this.cData;
     }
+
+    get getId() {
+        if (this.nextChangeId != null)
+            return this.nextChangeId;
+        return 'The next Id hasn\'t been set yet';
+    }
+
     //Method Prototypes
     fetchCurrentLeague() {
         return axios.get('https://api.pathofexile.com/leagues?type=main&offset=4&compact=1&limit=1')
@@ -90,19 +95,19 @@ class DataHandler {
     }
 
     getFreshId() {
-        axios.get('https://api.poe.watch/id')
+        return axios.get('https://api.poe.watch/id')
             .then(response => this.setId = response.data.id, error => console.log('Failed to get the current chunk id from poe.watch'));
     }
 
     spinUp() {
-        setInterval(() => this.getStashData(this.nextChangeId), this.refreshRate);
+        setInterval(() => this.getStashData(), this.refreshRate);
     }
 
-    getStashData(nextChangeId) {
+    getStashData() {
         if (this.ready && this.watchFor != null && this.nextChangeId != null) {
             this.ready = false;
             console.log(`Making GET request to ${`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`}`);
-            axios.get(`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`)
+            return axios.get(`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`)
                 .then(response => this.ready = this.parseNewData(response.data), error => { console.log('Failed to get stash data'); this.ready = true; });
         }
     }
@@ -114,7 +119,7 @@ class DataHandler {
             if (this.watchFor != null) {
                 data.stashes.forEach((element) => {
                     if (element.public && element.league == this.league) {
-                        if (this.stashTabs == null || this.stashTabs[element.id] == null)
+                        if (this.stashTabs[element.id] == undefined)
                             this.parseNewTab(element);
                         else
                             this.parseUpdatedTab(element);
@@ -142,7 +147,7 @@ class DataHandler {
                     time: new Date().getTime(),
                     chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
                 }
-                this.pushToNext({ id: element.id, acct: newTab.owner, char: newTab.lastChar, stashName: newTab.stashName, item: newTab.matches[element.id] }, 'add');
+                this.pushToNext({ id: element.id, stashId: newTab.id, acct: newTab.owner, char: newTab.lastChar, stashName: newTab.stashName, item: newTab.matches[element.id] }, 'add');
             }
         })
         if (Object.entries(newTab.matches).length != 0 && Object.entries(this.stashTabs).length < 50)
@@ -155,7 +160,7 @@ class DataHandler {
 
     parseUpdatedTab(tab) {
         let curTab = this.stashTabs[tab.id];
-        let oldItems = curTab.matches;
+        const oldItems = curTab.matches;
         curTab.matches = {};
 
         tab.items.forEach((element) => {
@@ -173,14 +178,15 @@ class DataHandler {
                     chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
                 }
                 if (oldItems[element.id] == undefined)
-                    this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
+                    this.pushToNext({ id: element.id, stashId: curTab.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
             }
-
-            Object.entries(oldItems).forEach(([, element]) => {
-                if (curTab.matches[element.id] == undefined)
-                    this.pushToNext({ id: element.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'remove');
-            })
         })
+
+        Object.entries(oldItems).forEach(([, element]) => {
+            if (curTab.matches[element.id] == undefined) 
+                this.pushToNext({ id: element.id, stashId: curTab.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: oldItems[element.id] }, 'remove');
+        });
+
         if (Object.entries(curTab.matches).length != 0)
             this.stashTabs[tab.id] = curTab;
         else
@@ -188,11 +194,16 @@ class DataHandler {
     }
 
     pushToNext(item, option) {
+        let i;
         switch (option) {
             case 'add':
+                i = this.nextData.removed.findIndex((el) => el.id == item.id && el.stashId == item.stashId);
+                i != -1 ? this.nextData.removed.splice(i,1) :
                 this.nextData.added.push(item);
                 break;
             case 'remove':
+                i = this.nextData.added.findIndex((el) => el.id == item.id && el.stashId == item.stashId);
+                i != -1 ? this.nextData.added.splice(i,1) :
                 this.nextData.removed.push(item);
                 break;
             default:

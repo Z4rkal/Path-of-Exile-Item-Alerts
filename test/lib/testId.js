@@ -1,0 +1,2 @@
+//A mock of the data returned from https://api.poe.watch/id to set up the initial stash id for tests involving DataHandler.js
+module.exports = {"id":"447010774-463577235-436918901-500591518-475195838","time":"2019-07-16T19:53:26Z"};
