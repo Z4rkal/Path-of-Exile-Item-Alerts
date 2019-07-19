@@ -184,22 +184,23 @@ class DataHandler {
 
         tab.items.forEach((element) => { //Go through the data tab by tab
             if (element.name == this.watchFor) { //If an item matches our search (currently just item name)
-                curTab.matches[element.id] = { //Then make a new item object and put it in newTab.matches
-                    id: element.id,
-                    name: element.name,
-                    icon: element.icon,
-                    ilvl: element.ilvl,
-                    corrupted: element.corrupted != undefined ? element.corrupted : false,
-                    modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
-                    position: [element.x, element.y],
-                    note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
-                    time,
-                    chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
-                }
-                //If the item didn't already exist, then push the new item to our this.nextData variable so that it can be sent to the front end
-                if (oldItems[element.id] == undefined)
+                if (oldItems[element.id] == undefined) { //If we didn't already know about the item, then handle it like a new item
+                    curTab.matches[element.id] = { //Then make a new item object and put it in newTab.matches
+                        id: element.id,
+                        name: element.name,
+                        icon: element.icon,
+                        ilvl: element.ilvl,
+                        corrupted: element.corrupted != undefined ? element.corrupted : false,
+                        modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
+                        position: [element.x, element.y],
+                        note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
+                        time,
+                        chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
+                    }
                     this.pushToNext({ id: element.id, stashId: curTab.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
-                //Otherwise we already knew about it, so do nothing
+                }
+                //Otherwise we already knew about it, so put the old item into curTab.matches
+                else { oldItems[element.id].time = time; curTab.matches[element.id] = oldItems[element.id]; }
             }
         })
 
