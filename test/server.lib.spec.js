@@ -160,13 +160,13 @@ describe('DH Class', () => {
     });
 
     it('The class should get the nextChangeId from api.poe.watch/id when a watchFor is set', async () => {
-        await DH.getFreshId();
+        await DH.fetchFreshId();
         expect(DH.getId).to.equal('447010774-463577235-436918901-500591518-475195838');
     });
 
     it('The class should be able to parse stash data from GGG\'s API and find the 4 \'Kaom\'s Sign\' listings in the first chunk of test data', async () => {
         DH.setWatch = 'Kaom\'s Sign';
-        await DH.getFreshId();
+        await DH.fetchFreshId();
 
         await DH.getStashData();
         expect(DH.getId).to.equal('447010817-463577289-436918925-500591543-475195882');
@@ -176,7 +176,7 @@ describe('DH Class', () => {
 
     it('The class should be able to parse all 5 chunks of test data in a row, the Voidfletchers it finds should be added to the nextData attribute', async () => {
         DH.setWatch = 'Voidfletcher';
-        await DH.getFreshId();
+        await DH.fetchFreshId();
 
         for (let i = 0; i < 5; i++) {
             await DH.getStashData();

@@ -6,77 +6,81 @@ const calculateRawValue = require('./calculateRawValue');
 //This class will handle all of the item and currency data for the server
 class DataHandler {
     constructor() {
-        this.ready = true;
-        this.league = null;
+        this.ready = true; //Variable for holding off on getting the next chunk of data until we're done parsing this one.
+        this.league = null; //The current league
         this.refreshRate = 1000 * 1; //1 second between checking if we're ready to get the next chunk of stash tabs
-        this.watchFor = null;
+        this.watchFor = null; //The search parameter, will eventually get replaced with a class since right now this only matches item names
 
-        this.stashTabs = {};
-        this.nextChangeId = null;
-        this.nextData = { added: [], removed: [] };
+        //Stash Data Variables
+        this.stashTabs = {}; //Stores every parsed stash tab with matched items
+        this.nextChangeId = null; //The Id for the next chunk of data from the stash tab API
+        this.nextData = { added: [], removed: [] }; //Stores data for the next time the frontend asks what has changed
 
+        //Variable for holding the currency data from the poe.watch api
+        //We need outside help to determine what is worth what since we're not tracking current currency rates ourselves
         this.cData = 'No currency data :(';
 
+        //Fetch the current league from GGG and then get the currency data from poe.watch for the current league
         this.fetchCurrentLeague().then(resolve => this.handleCurrencyData());
     }
 
-    get getAllData() {
+    get getAllData() { //Gets all of the stashs we currently have
         if (Object.entries(this.stashTabs).length != 0) return this.stashTabs;
         return 'No data at the moment :(';
     }
 
-    get getData() {
+    get getData() { //Gets the next set of data and then empties it, this solution only works for a single user
         let toSend = this.nextData;
         this.nextData = { added: [], removed: [] };
         return toSend;
     }
 
-    set setLeague(league) {
+    set setLeague(league) { //Sets the current league
         this.league = league;
         console.log(`The current league is ${this.league}`);
     }
 
-    get getLeague() {
+    get getLeague() { //Gets the value of the current league
         return this.league;
     }
 
-    set setId(Id) {
+    set setId(Id) { //Sets the next change Id
         this.nextChangeId = Id;
         console.log(`The next change ID is: ${this.nextChangeId}`);
     }
 
-    set setWatch(params) {
+    set setWatch(params) { //Sets the search parameters, currently just item name
         this.watchFor = params;
         this.nextData = { added: [], removed: [] };
-        this.stashTabs = {};
+        this.stashTabs = {}; //Empties out the stash tabs since we're searching for a new item;
 
-        if (this.nextChangeId == null)
-            return this.getFreshId();
+        if (this.nextChangeId == null) //Fetch the next chunk Id from poe.watch, but only once so we don't spam their API
+            return this.fetchFreshId();
     }
 
-    get getWatch() {
+    get getWatch() { //Get the current search value
         if (this.watchFor != null)
             return this.watchFor;
         return 'Not currently searching for anything :(';
     }
 
-    get getCData() {
+    get getCData() { //Get the currency data we got from poe.watch
         return this.cData;
     }
 
-    get getId() {
+    get getId() { //Get the next chunk Id
         if (this.nextChangeId != null)
             return this.nextChangeId;
         return 'The next Id hasn\'t been set yet';
     }
 
     //Method Prototypes
-    fetchCurrentLeague() {
+    fetchCurrentLeague() { //Returns an axios promise that resolves to setting the current league
         return axios.get('https://api.pathofexile.com/leagues?type=main&offset=4&compact=1&limit=1')
             .then(response => this.setLeague = response.data[0].id, error => console.log('Failed to get the current league'));
     }
 
-    async handleCurrencyData() {
+    async handleCurrencyData() { //Handles getting the currency data from poe.watch using the getCurrencyData function
 
         if (this.league == null) {
             this.cData = 'No currency data :(';
@@ -94,16 +98,16 @@ class DataHandler {
         }
     }
 
-    getFreshId() {
+    fetchFreshId() { //Returns an axios promise that resolves to setting the next chunk Id
         return axios.get('https://api.poe.watch/id')
             .then(response => this.setId = response.data.id, error => console.log('Failed to get the current chunk id from poe.watch'));
     }
 
-    spinUp() {
+    spinUp() { //Sets up an interval for fetching the next chunk of stash data from GGG
         setInterval(() => this.getStashData(), this.refreshRate);
     }
 
-    getStashData() {
+    getStashData() { //Fetches the next chunk of stash data and then hands it to the parseNewData method
         if (this.ready && this.watchFor != null && this.nextChangeId != null) {
             this.ready = false;
             console.log(`Making GET request to ${`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`}`);
@@ -112,60 +116,73 @@ class DataHandler {
         }
     }
 
-    parseNewData(data) {
-        console.log(`Next change ID: ${data.next_change_id}`);
+    parseNewData(data) { //Parses stash tab data passed to it
+        //If the next id in the data is new, then parse the data since it's a new chunk,
+        //otherwise we're at the end of the stream and we need to wait for the next chunk
         if (this.nextChangeId == null || this.nextChangeId != data.next_change_id) {
+            console.log(`Next change ID: ${data.next_change_id}`);
             this.nextChangeId = data.next_change_id;
-            if (this.watchFor != null) {
-                data.stashes.forEach((element) => {
-                    if (element.public && element.league == this.league) {
-                        if (this.stashTabs[element.id] == undefined)
-                            this.parseNewTab(element);
+            if (this.watchFor != null) { //If we have a search term
+                data.stashes.forEach((element) => { //Then go through each stash in the data chunk
+                    if (element.public && element.league == this.league) { //And if the stash is public and in the current league
+                        if (this.stashTabs[element.id] == undefined) //Then check if we don't already have this stash
+                            this.parseNewTab(element); //If so, then parse it as a new tab
                         else
-                            this.parseUpdatedTab(element);
+                            this.parseUpdatedTab(element); //Otherwise, parse it as a tab update
                     }
                 });
             }
         }
-        return true;
+        else console.log(`Reached the end of the stream, waiting for new chunk`);
+        return true; //Return true so that getStashData can make another request
     }
 
     //Currently this function and parseUpdatedTab are matching items by name, TODO: Update them to handle more advanced search parameters once the front end can send back more than an item name
-    parseNewTab(tab) {
+    parseNewTab(tab) { //Parses a new stash tab
+
+        const time = new Date().getTime(); //Get the time that the current tab is being parsed.
+
+        //Set up the new tab object by pulling info from the data, matches is where any items that match our search will go
         let newTab = { id: tab.id, owner: tab.accountName, lastChar: tab.lastCharacterName, stashName: tab.stash, matches: {} }
-        tab.items.forEach((element) => {
-            if (element.name == this.watchFor) {
-                newTab.matches[element.id] = {
+        tab.items.forEach((element) => { //Go through the tab item by item
+            if (element.name == this.watchFor) { //If an item matches our search (currently just item name)
+                newTab.matches[element.id] = { //Then make a new item object and put it in newTab.matches
                     id: element.id,
                     name: element.name,
-                    icon: element.icon,
+                    icon: element.icon, //The ingame sprite
                     ilvl: element.ilvl,
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
-                    position: [element.x, element.y],
-                    note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
-                    time: new Date().getTime(),
-                    chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
+                    position: [element.x, element.y], //Position in the stash tab
+                    note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A', //The price listing
+                    time, //The time that the item was parsed
+                    chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A' //Use calculateRawValue to determine the value in 'chaos orbs' of the listing
                 }
+                //Push the new item to our this.nextData variable so that it can be sent to the front end
                 this.pushToNext({ id: element.id, stashId: newTab.id, acct: newTab.owner, char: newTab.lastChar, stashName: newTab.stashName, item: newTab.matches[element.id] }, 'add');
             }
         })
+
+        //If we had any matches, then add the new tab to this.stashTabs
         if (Object.entries(newTab.matches).length != 0 && Object.entries(this.stashTabs).length < 50)
             this.stashTabs[tab.id] = newTab;
+        //Use an arbitrary limit of 50 stash tabs so that we don't eat through our allowed memory on Heroku or Now, way way lower than it could be
         else if (Object.entries(this.stashTabs).length == 50) {
             delete this.stashTabs[Object.entries(this.stashTabs)[0][1].id]; // = undefined;
             this.stashTabs[tab.id] = newTab;
         }
     }
 
-    parseUpdatedTab(tab) {
-        let curTab = this.stashTabs[tab.id];
-        const oldItems = curTab.matches;
-        curTab.matches = {};
+    parseUpdatedTab(tab) { //Parses a returning tab
+        let curTab = this.stashTabs[tab.id]; //Get the value of the stash tab as we currently know it in this.stashTabs
+        const oldItems = curTab.matches; //Get the old matches
+        curTab.matches = {}; //Empty out curTab
 
-        tab.items.forEach((element) => {
-            if (element.name == this.watchFor) {
-                curTab.matches[element.id] = {
+        tab.items.forEach((element) => { //Go through the data tab by tab
+            //If an item matches our search (currently just item name) and the item didn't already exist,
+            //then it's a new addition to the tab and should be added to this.nextData
+            if (element.name == this.watchFor && oldItems[element.id] == undefined) {
+                curTab.matches[element.id] = { //Then make a new item object and put it in newTab.matches
                     id: element.id,
                     name: element.name,
                     icon: element.icon,
@@ -177,37 +194,45 @@ class DataHandler {
                     time: new Date().getTime(),
                     chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
                 }
-                if (oldItems[element.id] == undefined)
-                    this.pushToNext({ id: element.id, stashId: curTab.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
+                //Push the new item to our this.nextData variable so that it can be sent to the front end
+                this.pushToNext({ id: element.id, stashId: curTab.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
             }
+            //Otherwise we already knew about it, so do nothing
         })
 
+        //Check through our old matches in the tab
         Object.entries(oldItems).forEach(([, element]) => {
-            if (curTab.matches[element.id] == undefined) 
+            if (curTab.matches[element.id] == undefined) //If an old item no longer exists, then tell the front end it has been removed
                 this.pushToNext({ id: element.id, stashId: curTab.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: oldItems[element.id] }, 'remove');
         });
 
+        //If the stash tab isn't empty, then update it in this.stashTabs
         if (Object.entries(curTab.matches).length != 0)
             this.stashTabs[tab.id] = curTab;
-        else
+        else //Otherwise, the items relevant to our search have been removed so get delete the tab in this.stashTabs
             delete this.stashTabs[tab.id]; // = undefined;
     }
 
-    pushToNext(item, option) {
-        let i;
+    pushToNext(item, option) { //Push items to this.nextData
+        let i; //dummy variable for storing the result of our findIndex operation
         switch (option) {
-            case 'add':
+            case 'add': 
+                //If we're adding, then check that this item wasn't previously thought to be removed this update
                 i = this.nextData.removed.findIndex((el) => el.id == item.id && el.stashId == item.stashId);
-                i != -1 ? this.nextData.removed.splice(i,1) :
-                this.nextData.added.push(item);
+                //If the item has an index in this.nextData.removed, then it's been re-added to the tab, so take it out of removed
+                i != -1 ? this.nextData.removed.splice(i, 1) :
+                    this.nextData.added.push(item); //Otherwise, it's a new item, so push it onto this.nextData.added
+
+                //This functionality is to ensure that items don't end up appearing multiple times in the 
+                //added and removed stacks if for whatever reason the frontend takes a long time between asking for this.nextData
                 break;
-            case 'remove':
+            case 'remove': //Do what we did above, but in reverse; i.e. if the item exists in added, then take it out of there
                 i = this.nextData.added.findIndex((el) => el.id == item.id && el.stashId == item.stashId);
-                i != -1 ? this.nextData.added.splice(i,1) :
-                this.nextData.removed.push(item);
+                i != -1 ? this.nextData.added.splice(i, 1) :
+                    this.nextData.removed.push(item); //Otherwise, it's been removed so push it onto this.nextData.removed
                 break;
-            default:
-                throw 'Heckin busted';
+            default: //if this somehow gets called with a bad option, then throw some nonsense
+                throw new Error('Heckin busted');
         }
     }
 }
