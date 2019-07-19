@@ -107,6 +107,8 @@ class DataHandler {
         setInterval(() => this.getStashData(), this.refreshRate);
     }
 
+    //If you want a reference for the structure of the data getStashData() is pulling in, you can either go to https://www.pathofexile.com/api/public-stash-tabs
+    //Or look at the mock data I wrote in the test/lib folder
     getStashData() { //Fetches the next chunk of stash data and then hands it to the parseNewData method
         if (this.ready && this.watchFor != null && this.nextChangeId != null) {
             this.ready = false;
@@ -178,10 +180,10 @@ class DataHandler {
         const oldItems = curTab.matches; //Get the old matches
         curTab.matches = {}; //Empty out curTab
 
+        const time = new Date().getTime(); //Get the time that the current tab is being parsed.
+
         tab.items.forEach((element) => { //Go through the data tab by tab
-            //If an item matches our search (currently just item name) and the item didn't already exist,
-            //then it's a new addition to the tab and should be added to this.nextData
-            if (element.name == this.watchFor && oldItems[element.id] == undefined) {
+            if (element.name == this.watchFor) { //If an item matches our search (currently just item name)
                 curTab.matches[element.id] = { //Then make a new item object and put it in newTab.matches
                     id: element.id,
                     name: element.name,
@@ -191,13 +193,14 @@ class DataHandler {
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y],
                     note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
-                    time: new Date().getTime(),
+                    time,
                     chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
                 }
-                //Push the new item to our this.nextData variable so that it can be sent to the front end
-                this.pushToNext({ id: element.id, stashId: curTab.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
+                //If the item didn't already exist, then push the new item to our this.nextData variable so that it can be sent to the front end
+                if (oldItems[element.id] == undefined)
+                    this.pushToNext({ id: element.id, stashId: curTab.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
+                //Otherwise we already knew about it, so do nothing
             }
-            //Otherwise we already knew about it, so do nothing
         })
 
         //Check through our old matches in the tab
@@ -216,7 +219,7 @@ class DataHandler {
     pushToNext(item, option) { //Push items to this.nextData
         let i; //dummy variable for storing the result of our findIndex operation
         switch (option) {
-            case 'add': 
+            case 'add':
                 //If we're adding, then check that this item wasn't previously thought to be removed this update
                 i = this.nextData.removed.findIndex((el) => el.id == item.id && el.stashId == item.stashId);
                 //If the item has an index in this.nextData.removed, then it's been re-added to the tab, so take it out of removed
