@@ -182,10 +182,10 @@ class DataHandler {
 
         const time = new Date().getTime(); //Get the time that the current tab is being parsed.
 
-        tab.items.forEach((element) => { //Go through the data tab by tab
-            if (element.name == this.watchFor) { //If an item matches our search (currently just item name)
+        tab.items.forEach((element) => { //Go through the tab item by item
+            if (element.name == this.watchFor) { //If an item matches our search (currently just item name), then parse it
                 if (oldItems[element.id] == undefined) { //If we didn't already know about the item, then handle it like a new item
-                    curTab.matches[element.id] = { //Then make a new item object and put it in newTab.matches
+                    curTab.matches[element.id] = { //First make a new item object and put it in curTab.matches
                         id: element.id,
                         name: element.name,
                         icon: element.icon,
@@ -196,7 +196,7 @@ class DataHandler {
                         note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
                         time,
                         chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
-                    }
+                    } //Then push it to this.nextData.added
                     this.pushToNext({ id: element.id, stashId: curTab.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
                 }
                 //Otherwise we already knew about it, so put the old item into curTab.matches
@@ -213,7 +213,7 @@ class DataHandler {
         //If the stash tab isn't empty, then update it in this.stashTabs
         if (Object.entries(curTab.matches).length != 0)
             this.stashTabs[tab.id] = curTab;
-        else //Otherwise, the items relevant to our search have been removed so get delete the tab in this.stashTabs
+        else //Otherwise, the items relevant to our search have been removed so delete the tab in this.stashTabs
             delete this.stashTabs[tab.id]; // = undefined;
     }
 

@@ -15,7 +15,7 @@ function formatPrice(note) {
     if (result == 'Price: N/A') return result;
 
     try { result += extractPrice(note); }
-    catch (error) { result = 'Price: N/A' }
+    catch (error) { console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'); console.log(error); console.log(note); result = 'Price: N/A'; }
 
     return result;
 }

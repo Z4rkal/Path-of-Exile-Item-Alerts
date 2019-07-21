@@ -1,1 +1,0 @@
-//This will be a class that handles the data received from the search form
