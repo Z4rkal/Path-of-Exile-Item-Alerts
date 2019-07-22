@@ -109,21 +109,25 @@ class Output extends Component {
         if (Object.entries(this.props.results).length != 0)
             //TODO: Need to bring out sort to another function once there are more than two styles of sort, i.e. once we can sort by item modifier
             return (
-                <div className='panel panel-info'>
-                    <div className='panel-heading'>
-                        <div className='row'>
-                            <span className='col-xs-6'>Results</span>
-                            <span className='col-xs-offset-4 col-xs-2' htmlFor='sort-select'>Sorting by: <span id='sort-display'>{this.props.sortStyle.charAt(0).toUpperCase() + this.props.sortStyle.slice(1)}</span></span>
+                <div className='card' style={{ borderColor: '#9dc8d6' }}>
+                    <div className='card-header' style={{ color: '#fff0f0', backgroundColor: '#add8e6' }}>
+                        <div className='row justify-content-between'>
+                            <span className='col-xs-auto' style={{ marginLeft: '1rem' }}>Results</span>
+                            <span className='col-xs-auto' style={{ marginRight: '1rem' }} htmlFor='sort-select'>Sorting by: <span id='sort-display'>{this.props.sortStyle.charAt(0).toUpperCase() + this.props.sortStyle.slice(1)}</span></span>
                         </div>
                     </div>
-                    <div className='panel-body'>
+                    <div className='card-body'>
                         <ul className='list-group'>
                             {this.buildItems()}
                         </ul>
                     </div>
                 </div>
             );
-        return (<div></div>);
+        return (
+            <div className='card' style={{ borderColor: '#9dc8d6' }}>
+                <div className='card-header' style={{ color: '#ffffaa', backgroundColor: '#add8e6' }}>Waiting for results from server.</div>
+            </div>
+        );
     }
 }
 

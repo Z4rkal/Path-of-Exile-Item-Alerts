@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import Header from './Header';
+import SearchForm from './SearchForm';
 import Output from './Output';
 
 class App extends Component {
     constructor() {
         super();
         this.state = {
-            search: '',
+            advanced: false,
             league: '',
             data: {},
             sortStyle: 'age',
@@ -68,32 +69,36 @@ class App extends Component {
         });
     }
 
-    handleSubmit() {
-        if (this.state.search == undefined || this.state.search == '') alert('Please enter a value into the search field');
+    handleSubmit(search) {
+        if (search == undefined || Object.entries(search).length == 0) alert('Please enter a value into the search field');
         else {
-            let data = {};
-            this.setState({ data: data });
-            axios.post(`/api/search?id=${this.state.search}`, 'Hewwo mxs sewver').then(response => console.log(response.data), error => console.log(`Failed to submit new search criteria to the server.`));
+            this.setState({ data: {} });
+            axios.post(`/api/search?id=${search}`, { search, message: 'Hewwo mxs sewver' }).then(response => console.log(response.data), error => console.log(`Failed to submit new search criteria to the server.`));
         }
     }
 
     render() {
 
         return (
-            <div className='container'>
+            <React.Fragment>
                 <Header
-                    search={this.state.search}
+                    advanced={this.state.advanced}
                     updateInput={this.updateInput}
-                    handleSubmit={this.handleSubmit}
                 />
-                <Output
-                    league={this.state.league}
-                    results={this.state.data}
-                    updateInput={this.updateInput}
-                    sortStyle={this.state.sortStyle}
-                    mod={this.state.mod}
-                />
-            </div>
+                <div className='container'>
+                    <SearchForm
+                        advanced={this.state.advanced}
+                        handleSubmit={this.handleSubmit}
+                    />
+                    <Output
+                        league={this.state.league}
+                        results={this.state.data}
+                        updateInput={this.updateInput}
+                        sortStyle={this.state.sortStyle}
+                        mod={this.state.mod}
+                    />
+                </div>
+            </React.Fragment>
         )
     }
 }
