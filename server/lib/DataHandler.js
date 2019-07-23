@@ -2,17 +2,20 @@ const axios = require('axios');
 const formatPrice = require('./formatPrice');
 const getCurrencyData = require('./getCurrencyData');
 const calculateRawValue = require('./calculateRawValue');
+const SearchHandler = require('./SearchHandler');
 
 //This class will handle all of the item and currency data for the server
 class DataHandler {
     constructor() {
+        this.searchHandler = new SearchHandler()
         this.ready = true; //Variable for holding off on getting the next chunk of data until we're done parsing this one.
         this.league = null; //The current league
         this.refreshRate = 1000 * 1; //1 second between checking if we're ready to get the next chunk of stash tabs
-        this.watchFor = null; //The search parameter, will eventually get replaced with a class since right now this only matches item names
+        this.watchFor = this.searchHandler.getParser; //The search parameter, will eventually get replaced with a class since right now this only matches item names
 
         //Stash Data Variables
         this.stashTabs = {}; //Stores every parsed stash tab with matched items
+        this.numParsed = 0;
         this.nextChangeId = null; //The Id for the next chunk of data from the stash tab API
         this.nextData = { added: [], removed: [] }; //Stores data for the next time the frontend asks what has changed
 
@@ -50,7 +53,8 @@ class DataHandler {
     }
 
     set setWatch(params) { //Sets the search parameters, currently just item name
-        this.watchFor = params;
+        this.searchHandler.newParams = params;
+        this.watchFor = this.searchHandler.getParser;
         this.nextData = { added: [], removed: [] };
         this.stashTabs = {}; //Empties out the stash tabs since we're searching for a new item;
 
@@ -72,6 +76,10 @@ class DataHandler {
         if (this.nextChangeId != null)
             return this.nextChangeId;
         return 'The next Id hasn\'t been set yet';
+    }
+
+    get getNumParsed() {
+        return this.numParsed;
     }
 
     //Method Prototypes
@@ -119,6 +127,7 @@ class DataHandler {
     }
 
     parseNewData(data) { //Parses stash tab data passed to it
+        console.log('Received data');
         //If the next id in the data is new, then parse the data since it's a new chunk,
         //otherwise we're at the end of the stream and we need to wait for the next chunk
         if (this.nextChangeId == null || this.nextChangeId != data.next_change_id) {
@@ -127,6 +136,7 @@ class DataHandler {
             if (this.watchFor != null) { //If we have a search term
                 data.stashes.forEach((element) => { //Then go through each stash in the data chunk
                     if (element.public && element.league == this.league) { //And if the stash is public and in the current league
+                        this.numParsed++;
                         if (this.stashTabs[element.id] == undefined) //Then check if we don't already have this stash
                             this.parseNewTab(element); //If so, then parse it as a new tab
                         else
@@ -147,7 +157,7 @@ class DataHandler {
         //Set up the new tab object by pulling info from the data, matches is where any items that match our search will go
         let newTab = { id: tab.id, owner: tab.accountName, lastChar: tab.lastCharacterName, stashName: tab.stash, matches: {} }
         tab.items.forEach((element) => { //Go through the tab item by item
-            if (element.name == this.watchFor) { //If an item matches our search (currently just item name)
+            if (this.watchFor(element)) { //If an item matches our search (currently just item name)
                 newTab.matches[element.id] = { //Then make a new item object and put it in newTab.matches
                     id: element.id,
                     name: element.name,
@@ -183,7 +193,7 @@ class DataHandler {
         const time = new Date().getTime(); //Get the time that the current tab is being parsed.
 
         tab.items.forEach((element) => { //Go through the tab item by item
-            if (element.name == this.watchFor) { //If an item matches our search (currently just item name), then parse it
+            if (this.watchFor(element)) { //If an item matches our search (currently just item name), then parse it
                 if (oldItems[element.id] == undefined) { //If we didn't already know about the item, then handle it like a new item
                     curTab.matches[element.id] = { //First make a new item object and put it in curTab.matches
                         id: element.id,

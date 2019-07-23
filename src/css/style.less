@@ -21,3 +21,21 @@ body {
 .hover:hover {
     background: #bbbbbbcc;
 }
+
+.navbar, .card {
+    margin-bottom: 1rem;
+}
+
+#advanced-form {
+    height: 0;
+    overflow: hidden;
+    transition: 0.5s;
+    opacity: 0;
+    visibility: hidden; 
+}
+
+#advanced-form.show {
+    height: auto;
+    opacity: 1;
+    visibility: visible; 
+}

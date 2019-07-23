@@ -155,8 +155,8 @@ describe('DH Class', () => {
     });
 
     it('The class should have a setter and getter for the \'watchFor\' attribute, and both should work properly', () => {
-        expect(DH.setWatch = 'Voidfletcher').to.be.ok;
-        expect(DH.getWatch).to.equal('Voidfletcher');
+        expect(DH.setWatch = { name: 'Voidfletcher' }).to.be.ok;
+        expect(DH.getWatch.toString()).to.equal('function (item) {\ntry {\n\tif(!/^Voidfletcher$/i.test(item.name)) return false;\n} catch(error) {\n\tconsole.log(\'!!!!!!!!!!\');\n\tconsole.log(`Param: name, Element: Voidfletcher`);\n\tconsole.log(`Error: ${error}`);\n\treturn false;\n}\n\nreturn true;\n}');
     });
 
     it('The class should get the nextChangeId from api.poe.watch/id when a watchFor is set', async () => {
@@ -165,7 +165,7 @@ describe('DH Class', () => {
     });
 
     it('The class should be able to parse stash data from GGG\'s API and find the 4 \'Kaom\'s Sign\' listings in the first chunk of test data', async () => {
-        DH.setWatch = 'Kaom\'s Sign';
+        DH.setWatch = { name: 'Kaom\'s Sign' };
         await DH.fetchFreshId();
 
         await DH.getStashData();
@@ -175,7 +175,7 @@ describe('DH Class', () => {
     });
 
     it('The class should be able to parse all 5 chunks of test data in a row, the Voidfletchers it finds should be added to the nextData attribute', async () => {
-        DH.setWatch = 'Voidfletcher';
+        DH.setWatch = { name: 'Voidfletcher' };
         await DH.fetchFreshId();
 
         for (let i = 0; i < 5; i++) {
@@ -191,7 +191,7 @@ describe('DH Class', () => {
 
     it('The class should be able to handle modifications to previously parsed tabs correctly', async () => {
         DH.setId = 'mock-1';
-        DH.setWatch = 'Voidfletcher';
+        DH.setWatch = { name: 'Voidfletcher' };
 
         await DH.getStashData();
         let i = false;
@@ -241,11 +241,11 @@ describe('DH Class', () => {
         i = false;
         while (!i) i = DH.ready; //Wait until the data is done being parsed
         expect(DH.getId).to.equal('mock-5');
-        
+
         expect(Object.entries(DH.stashTabs).length).to.equal(2);
-        expect(Object.entries(DH.stashTabs).reduce((a,[,tab]) => {
+        expect(Object.entries(DH.stashTabs).reduce((a, [, tab]) => {
             return a + Object.entries(tab.matches).length;
-        },0)).to.equal(4);
+        }, 0)).to.equal(4);
 
         await DH.getStashData();
         i = false;

@@ -4,11 +4,32 @@ import Header from './Header';
 import SearchForm from './SearchForm';
 import Output from './Output';
 
+String.prototype.hashCode = function () {
+    let hash = 0;
+    if (this.length == 0) return hash;
+
+    let char;
+
+    for (let i = 0; i < this.length; i++) {
+        char = this.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+
+    if (hash < 0) hash *= -2;
+
+    return hash;
+}
+
+
+
 class App extends Component {
     constructor() {
         super();
         this.state = {
             advanced: false,
+            searching: false,
+            numParsed: 0,
             league: '',
             data: {},
             sortStyle: 'age',
@@ -32,22 +53,34 @@ class App extends Component {
         axios.get('/api/all')
             .then(response => this.initializeData(response.data), error => /*console.log(error)*/'');
 
-        let serverRef = setInterval(() => axios.get('/api/cur').then(response => this.handleNewData(response.data), error => { clearInterval(serverRef); console.log(`Can't reach server, aborting asking for new data`) }), 1000 * 4);
+        let serverRef = setInterval(() => axios.get('/api/cur')
+            .then((response) => {
+                if (response.data.added.length != 0 || response.data.removed.length != 0)
+                    this.handleNewData(response.data)
+                else if (Object.entries(this.state.data).length == 0)
+                    axios.get('/api/numparsed')
+                        .then(response => this.setState({ numParsed: response.data }))
+                        .catch(() => console.log('Having issues communicating with the server'))
+            })
+            .catch(error => { clearInterval(serverRef); console.log(`Can't reach server, aborting asking for new data`) }), 1000 * 4);
     }
 
     initializeData(dataIn) {
         let data = {}
 
-        if (dataIn != 'No data at the moment :(')
+        if (dataIn != 'No data at the moment :(') {
             Object.entries(dataIn).forEach(([, stash]) => {
                 Object.entries(stash.matches).forEach(([, item]) => {
                     data[item.id] = { id: item.id, acct: stash.owner, char: stash.lastChar, stashName: stash.stashName, position: stash.position, item: stash.matches[item.id] }
                 });
             });
 
-        this.setState({
-            data: data
-        });
+            this.setState({
+                searching: true,
+                data: data
+            });
+        }
+
     }
 
     handleNewData(dataIn) {
@@ -72,8 +105,15 @@ class App extends Component {
     handleSubmit(search) {
         if (search == undefined || Object.entries(search).length == 0) alert('Please enter a value into the search field');
         else {
-            this.setState({ data: {} });
-            axios.post(`/api/search?id=${search}`, { search, message: 'Hewwo mxs sewver' }).then(response => console.log(response.data), error => console.log(`Failed to submit new search criteria to the server.`));
+            this.setState({
+                data: {},
+                numParsed: 0,
+                searching: true,
+                sortStyle: 'age',
+                mod: { text: '', pattern: /^$/, numVals: 0, type: '' }
+            });
+
+            axios.post(`/api/search?id=${JSON.stringify(search).hashCode()}`, search).then(response => console.log(response.data), error => { console.log(error); console.log(`Failed to submit new search criteria to the server.`) });
         }
     }
 
@@ -91,6 +131,8 @@ class App extends Component {
                         handleSubmit={this.handleSubmit}
                     />
                     <Output
+                        searching={this.state.searching}
+                        numParsed={this.state.numParsed}
                         league={this.state.league}
                         results={this.state.data}
                         updateInput={this.updateInput}

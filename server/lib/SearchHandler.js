@@ -11,51 +11,90 @@ class SearchHandler {
     }
 
     set newParams(searchParams) {
-        eval(`${this.buildParser(searchParams)}`);
+        try {
+            //First sanitize the input by getting rid of null values
+            Object.entries(searchParams).forEach(([param, el]) => {
+                if (el === null || (el[0] === null && el[1] === null)) delete searchParams[param];
+            });
+
+            //Then build the function by evaluating the string literal returned by this.buildSearchFunc
+            eval(`this.parseItem = ${this.buildSearchFunc(searchParams)}`);
+            //console.log('::::Completed Function::::');
+            //console.log(this.parseItem.toString());
+        }
+        catch (error) {
+            console.log(error);
+            console.log(this.buildSearchFunc(searchParams));
+        }
     }
 
-    buildParser(params) {
-        let functionString = 'this.parseItem = function (item) {';
+    //Builds a string literal of a custom function for matching the search parameters passed in.
+    //This is probably horrible code but it sounded like a really cool idea so I wanted to write it this way just to see if I could get it to work.
+    //Pros: The function it builds should be somewhat faster than a generic catchall that checks every possible search term,
+    //speed is pretty important considering the sheer volume of data from the GGG api that we're searching through
+    //Cons: Probably a nightmare to maintain / test, we'll see
+    buildSearchFunc(params) {
+        let functionString = 'function (item) {';
 
         functionString += Object.entries(params).reduce((a, [param, el]) => {
-            if (el == null) return a;
+            if (el == undefined || el == null) return a;
 
-            a += `try{`
+            a += `\ntry {`
 
             switch (param) {
                 case 'name':
-                    a += ` if(item.name != ${el}) return false`;
+                    a += `\n\tif(!/^${el}$/i.test(item.name)) return false;`;
+                    break;
                 case 'type':
-                    a += ` if(JSON.stringify(item.category) != ${el}) return false;`;
+                    a += `\n\tif(!/${el}/i.test(JSON.stringify(item.category))) return false;`;
+                    break;
                 case 'base':
-                    a += ` if(item.typeLine != ${el}) return false;`;
+                    a += `\n\tif(!/^${el}$/i.test(item.typeLine)) return false;`;
+                    break;
                 case 'links':
-                    a += ` let [,,maxLinks] = item.sockets.reduce((a,el.group,i) => {
-                                    if(el.group == a[1]) a[0]++;
-                                    else {
-                                        if(a[2] < a[0]) a[2] = a[0];
-                                        a[0] = 1; a[1] = el.group;
-                                    }
-                                    return a;
-                                },[0,0,0]); if(maxLinks < ${el}) return false;`;
+                    a += `\n\tif(item.sockets == undefined) return false;`
+                    a += `\n\tlet [,,maxLinks] = item.sockets.reduce((a,el,i) => {`
+                    a += /*    */`\n\t\tif(el.group == a[1]) a[0]++;`
+                    a += /*    */`\n\t\telse {`
+                    a += /*        */`\n\t\t\tif(a[2] < a[0]) a[2] = a[0];`
+                    a += /*        */`\n\t\t\ta[0] = 1; a[1] = el.group;`
+                    a += /*    */`\n\t\t}`
+                    a += /*    */`\n\t\tif(i == item.sockets.length - 1 && a[0] > a[2]) a[2] = a[0];`
+                    a += /*    */`\n\t\treturn a;`
+                    a += `\n\t}, [0, 0, 0]);`
+                    a += `\n\tif (${el[0] != null && el[1] != null
+                        ? `maxLinks < ${el[0]} || maxLinks > ${el[1]}`
+                        : `${el[0] != null
+                            ? `maxLinks < ${el[0]}`
+                            : `maxLinks > ${el[1]}`}`}) return false;`;
+                    break;
                 case 'sockets':
-                    a += ` if(item.sockets.length < ${el}) return false;`;
+                    a += `\n\tif (item.sockets == undefined || ${el[0] != null && el[1] != null
+                        ? `item.sockets.length < ${el[0]} || item.sockets.length > ${el[1]}`
+                        : `${el[0] != null
+                            ? `item.sockets.length < ${el[0]}`
+                            : `item.sockets.length > ${el[1]}`}`}) return false;`;
+                    break;
                 case 'corrupted':
-                    a += ` if(item.corrupted != ${el}) return false;`;
+                    a += `\n\tif (item.corrupted != ${el}) return false;`;
+                    break;
                 case 'shaper':
-                    a += ` if(item.shaper != ${el}) return false;`;
+                    a += `\n\tif (item.shaper != ${el}) return false;`;
+                    break;
                 case 'elder':
-                    a += ` if(item.elder != ${el}) return false;`;
+                    a += `\n\tif (item.elder != ${el}) return false;`;
+                    break;
                 case 'ilvl':
-                    a += ` if(item.ilvl < ${el}) return false;`;
+                    a += `\n\tif (item.ilvl < ${el}) return false;`;
             }
 
-            a += ` } catch(error) { console.log('!!!!!!!!!!'); console.log(\`Param: \${param}, Element: \${el}\`); console.log(\`Error: \${error}\`); return false; }`
+            //Once this is thoroughly tested we can get rid of these try/catch blocks around each statement, but for now this reports on any errors in the resulting code
+            a += `\n} catch(error) {\n\tconsole.log('!!!!!!!!!!');\n\tconsole.log(\`Param: ${param}, Element: ${el}\`);\n\tconsole.log(\`Error: \${error}\`);\n\treturn false;\n}\n`
 
             return a;
         }, '');
 
-        functionString += ' return true; };';
+        functionString += '\nreturn true;\n};';
 
         return functionString;
     }
@@ -98,4 +137,29 @@ module.exports = SearchHandler;
         -field for modifier groups
 
         -options for corrupted, shaped, elder, ilvl, quality, price, etc.
+*/
+
+/* Tabula Example
+{
+    "verified": false,
+    "w": 2, "h": 3,
+    "ilvl": 82,
+    "icon": "https:\/\/web.poecdn.com\/image\/Art\/2DItems\/Armours\/BodyArmours\/TabulaRasa.png?scale=1&w=2&h=3&v=c169e1ab88583925693bb3a35cc49b6b", "league": "Legion", "id": "783a97efccb6ed0b101562db7ce91d559d43104d217a9643964424e8ff4bca06",
+    "sockets": [
+        { "group": 0, "attr": "G", "sColour": "W" },
+        { "group": 0, "attr": "G", "sColour": "W" },
+        { "group": 0, "attr": "G", "sColour": "W" },
+        { "group": 0, "attr": "G", "sColour": "W" },
+        { "group": 0, "attr": "G", "sColour": "W" },
+        { "group": 0, "attr": "G", "sColour": "W" }],
+    "name": "Tabula Rasa",
+    "typeLine": "Simple Robe",
+    "identified": true,
+    "corrupted": true,
+    "frameType": 3,
+    "category": { "armour": ["chest"] },
+    "x": 2, "y": 0,
+    "inventoryId": "Stash3",
+    "socketedItems": []
+}
 */
