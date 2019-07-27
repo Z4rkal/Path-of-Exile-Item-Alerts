@@ -56,6 +56,7 @@ class DataHandler {
         this.searchHandler.newParams = params;
         this.watchFor = this.searchHandler.getParser;
         this.nextData = { added: [], removed: [] };
+        this.numParsed = 0;
         this.stashTabs = {}; //Empties out the stash tabs since we're searching for a new item;
 
         if (this.nextChangeId == null) //Fetch the next chunk Id from poe.watch, but only once so we don't spam their API

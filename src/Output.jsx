@@ -110,7 +110,7 @@ class Output extends Component {
             //TODO: Need to bring out sort to another function once there are more than two styles of sort, i.e. once we can sort by item modifier
             return (
                 <div className='card' style={{ borderColor: '#9dc8d6' }}>
-                    <div className='card-header' style={{ color: '#f6f3dc', backgroundColor: '#add8e6' }}>
+                    <div className='card-header' style={{ color: '#333333', backgroundColor: '#add8e6' }}>
                         <div className='row justify-content-between'>
                             <span className='col-xs-auto' style={{ marginLeft: '1rem' }}>Results</span>
                             <span className='col-xs-auto' style={{ marginRight: '1rem' }} htmlFor='sort-select'>Sorting by: <span id='sort-display'>{this.props.sortStyle.charAt(0).toUpperCase() + this.props.sortStyle.slice(1)}</span></span>
@@ -125,7 +125,7 @@ class Output extends Component {
             );
         return ( this.props.searching ?
             <div className='card' style={{ borderColor: '#9dc8d6' }}>
-                <div className='card-header' style={{ color: '#f6f3dc', backgroundColor: '#add8e6' }}>Waiting for results from server; tabs parsed: {this.props.numParsed}</div>
+                <div className='card-header' style={{ color: '#333333', backgroundColor: '#add8e6' }}>Waiting for results from server; tabs parsed: {this.props.numParsed}</div>
             </div> : <div></div>
         );
     }
