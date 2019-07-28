@@ -55,7 +55,7 @@ app.post('/api/search', (req, res) => {
     //console.log(/id\=([^\&]+)/.exec(req.url));
 })
 
-app.get('.*', (req, res) => {
+app.get('*', (req, res) => {
     res.status(404).send('404: Resource not found.');
 });
 

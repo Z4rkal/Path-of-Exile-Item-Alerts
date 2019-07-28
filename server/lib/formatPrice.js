@@ -19,9 +19,9 @@ function formatPrice(note) {
         return result;
     }
     catch (error) {
-        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-        console.log(error);
-        console.log(note);
+        //console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        //console.log(error);
+        //console.log(note);
         return 'Price: N/A';
     }
 }

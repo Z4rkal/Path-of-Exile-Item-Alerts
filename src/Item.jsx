@@ -24,12 +24,14 @@ class Item extends Component {
         //Reference whisper taken from a poe.trade search, it's important to mostly stick to their whisper format for a smooth trading experience
         //'@GrazynaZeSzczecina Hi, I would like to buy your Hypnotic Twirl Paua Ring listed for 1 alteration in Legion (stash tab "S"; position: left 1, top 2)'
         try {
-            let result = `@${listing.char} Hi, I would like to buy your ${listing.item.name} ${listing.item.note != 'Price: N/A' ? `listed for ${/[0-9]+ [a-z ]+$/i.exec(listing.item.note)[0]}` : ``} in ${this.props.league}${listing.stashName != undefined && listing.item.position != undefined ? ` (stash tab "${listing.stashName}"; position: left ${listing.item.position[0]}, top ${listing.item.position[1]})` : ``}`;
+            let result = `@${listing.char} Hi, I would like to buy your ${listing.item.name} ${listing.item.note != 'Price: N/A' ? `listed for ${/[0-9]+ [a-z ']+$/i.exec(listing.item.note)[0]}` : ``} in ${this.props.league}${listing.stashName != undefined && listing.item.position != undefined ? ` (stash tab "${listing.stashName}"; position: left ${listing.item.position[0]}, top ${listing.item.position[1]})` : ``}`;
             this.setState({ whisper: result });
         }
         catch (error) {
-            console.log(error);
-            console.log(item.note);
+            console.log('!!!!!!!!!!!! The mystical null note has appeared :O !!!!!!!!!!!!');
+            console.log(`Error: ${error}`);
+            console.log(`Note: ${listing.item.note}`);
+            console.log(`Entire listing: ${JSON.stringify(listing)}`);
             this.setState({ whisper: 'Failed to generate whisper' });
         }
     }

@@ -2,7 +2,7 @@ const curTypes = Object.entries(require('./currencyTypes'));
 
 function extractPrice(note) {
     let result = '';
-    let price = /([0-9\.]+) ([a-z]+)$/i;
+    let price = /(\.?[0-9]+|[0-9]+\.[0-9]+)\.? ([a-z]+)$/i;
 
     if (price.test(note)) {
         let extractPrice = price.exec(note);

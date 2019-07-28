@@ -14,7 +14,11 @@ class SearchHandler {
         try {
             //First sanitize the input by getting rid of null values
             Object.entries(searchParams).forEach(([param, el]) => {
-                if (el === null || (el[0] === null && el[1] === null)) delete searchParams[param];
+                if (el === null || el === '' || ((el[0] === null || el[0] === '') && (el[1] === null || el[1] === ''))) delete searchParams[param];
+                else {
+                    if (el[0] === '') searchParams[param][0] = null;
+                    if (el[1] === '') searchParams[param][1] = null;
+                }
             });
 
             //Then build the function by evaluating the string literal returned by this.buildSearchFunc
@@ -34,7 +38,7 @@ class SearchHandler {
     //speed is pretty important considering the sheer volume of data from the GGG api that we're searching through
     //Cons: Probably a nightmare to maintain / test, we'll see
     buildSearchFunc(params) {
-        let functionString = 'function (item) {';
+        let functionString = 'function (item) { let i;';
 
         functionString += Object.entries(params).reduce((a, [param, el]) => {
             if (el == undefined || el == null) return a;
@@ -52,7 +56,7 @@ class SearchHandler {
                     a += `\n\tif(!/^${el}$/i.test(item.typeLine)) return false;`;
                     break;
                 case 'links':
-                    a += `\n\tif(item.sockets == undefined) return false;`
+                    a += `\n\tif(item.sockets == undefined${el[0] != null ? ` || item.sockets.length < ${el[0]}` : ``}) return false;`
                     a += `\n\tlet [,,maxLinks] = item.sockets.reduce((a,el,i) => {`
                     a += /*    */`\n\t\tif(el.group == a[1]) a[0]++;`
                     a += /*    */`\n\t\telse {`
@@ -76,16 +80,65 @@ class SearchHandler {
                             : `item.sockets.length > ${el[1]}`}`}) return false;`;
                     break;
                 case 'corrupted':
-                    a += `\n\tif (item.corrupted != ${el}) return false;`;
+                    a += `\n\tif (${el === 'true' ? `!` : ``}item.corrupted) return false;`;
                     break;
-                case 'shaper':
-                    a += `\n\tif (item.shaper != ${el}) return false;`;
+                case 'shaperElder':
+                    switch (el) {
+                        case 'shaper':
+                            a += `\n\tif (!item.shaper) return false;`;
+                            break;
+                        case 'elder':
+                            a += `\n\tif (!item.elder) return false;`;
+                            break;
+                        case 'either':
+                            a += `\n\tif (!item.shaper && !item.elder) return false;`;
+                            break;
+                        case 'neither':
+                            a += `\n\tif (item.shaper || item.elder) return false;`;
+                            break;
+                        default: throw new Error('Bad shaperElder input >:(');
+                    }
                     break;
-                case 'elder':
-                    a += `\n\tif (item.elder != ${el}) return false;`;
+                case 'iLvl':
+                    a += `\n\tif (${el[0] != null
+                        ? `item.ilvl < ${el[0]}${el[1] != null
+                            ? ` || item.ilvl > ${el[1]}`
+                            : ``}` : `${el[1] != null
+                                ? `item.ilvl > ${el[1]}`
+                                : `true) throw new Error('vewy wong ;w;');`}`}) return false;`;
                     break;
-                case 'ilvl':
-                    a += `\n\tif (item.ilvl < ${el}) return false;`;
+                case 'tier':
+                    a += `\n\tif(item.properties === undefined) return false;`;
+                    a += `\n\tlet i = item.properties.findIndex((el) => el.name === 'Map Tier' || el.name === 'Level' ? true : false);`;
+                    a += `\n\tif(i === -1) return false;`;
+                    if (el[0] != null) {
+                        a += `\n\tif(/[0-9]+/.exec(item.properties[i].values[0][0])[0] < ${el[0]}`;
+                        if (el[1] != null)
+                            a += ` || /[0-9]+/.exec(item.properties[i].values[0][0])[0] > ${el[1]}) return false;`;
+                        else a += `) return false;`;
+                    }
+                    else if (el[1] != null) {
+                        a += `\n\tif(/[0-9]+/.exec(item.properties[i].values[0][0])[0] > ${el[1]}) return false;`
+                    }
+                    else throw new Error('vewy wong ;w;');
+                    break;
+                case 'quality':
+                        a += `\n\tif(item.properties === undefined) return false;`;
+                        a += `\n\tlet i = item.properties.findIndex((el) => el.name === 'Quality'? true : false);`;
+                        a += `\n\tif(i === -1) return false;`;
+                        if (el[0] != null) {
+                            a += `\n\tif(/[0-9]+/.exec(item.properties[i].values[0][0])[0] < ${el[0]}`;
+                            if (el[1] != null)
+                                a += ` || /[0-9]+/.exec(item.properties[i].values[0][0])[0] > ${el[1]}) return false;`;
+                            else a += `) return false;`;
+                        }
+                        else if (el[1] != null) {
+                            a += `\n\tif(/[0-9]+/.exec(item.properties[i].values[0][0])[0] > ${el[1]}) return false;`
+                        }
+                        else throw new Error('vewy wong ;w;');
+                    break;
+                default:
+                    throw new Error(`Error: Invalid search parameter; ${param} is either a bad input or not implemented yet!`)
             }
 
             //Once this is thoroughly tested we can get rid of these try/catch blocks around each statement, but for now this reports on any errors in the resulting code
