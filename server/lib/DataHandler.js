@@ -11,7 +11,7 @@ class DataHandler {
         this.ready = true; //Variable for holding off on getting the next chunk of data until we're done parsing this one.
         this.league = null; //The current league
         this.refreshRate = 1000 * 1; //1 second between checking if we're ready to get the next chunk of stash tabs
-        this.watchFor = this.searchHandler.getParser; //The search parameter, will eventually get replaced with a class since right now this only matches item names
+        this.watchFor = this.searchHandler.getSearchFunc; //The search parameter, will eventually get replaced with a class since right now this only matches item names
 
         //Stash Data Variables
         this.stashTabs = {}; //Stores every parsed stash tab with matched items
@@ -54,7 +54,7 @@ class DataHandler {
 
     set setWatch(params) { //Sets the search parameters, currently just item name
         this.searchHandler.newParams = params;
-        this.watchFor = this.searchHandler.getParser;
+        this.watchFor = this.searchHandler.getSearchFunc;
         this.nextData = { added: [], removed: [] };
         this.numParsed = 0;
         this.stashTabs = {}; //Empties out the stash tabs since we're searching for a new item;
@@ -159,17 +159,21 @@ class DataHandler {
         let newTab = { id: tab.id, owner: tab.accountName, lastChar: tab.lastCharacterName, stashName: tab.stash, matches: {} }
         tab.items.forEach((element) => { //Go through the tab item by item
             if (this.watchFor(element)) { //If an item matches our search (currently just item name)
+                const price = element.note != undefined ? formatPrice(element.note) : 'Price: N/A';
+                const type = 'Unimplemented';
                 newTab.matches[element.id] = { //Then make a new item object and put it in newTab.matches
                     id: element.id,
                     name: element.name,
+                    type,
                     icon: element.icon, //The ingame sprite
                     ilvl: element.ilvl,
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
+                    shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : 'N/A',
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y], //Position in the stash tab
-                    note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A', //The price listing
+                    note: price, //The price listing
                     time, //The time that the item was parsed
-                    chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A' //Use calculateRawValue to determine the value in 'chaos orbs' of the listing
+                    chaos: price != 'Price: N/A' ? calculateRawValue(price, this.cData) : 'N/A' //Use calculateRawValue to determine the value in 'chaos orbs' of the listing
                 }
                 //Push the new item to our this.nextData variable so that it can be sent to the front end
                 this.pushToNext({ id: element.id, stashId: newTab.id, acct: newTab.owner, char: newTab.lastChar, stashName: newTab.stashName, item: newTab.matches[element.id] }, 'add');
@@ -196,17 +200,21 @@ class DataHandler {
         tab.items.forEach((element) => { //Go through the tab item by item
             if (this.watchFor(element)) { //If an item matches our search (currently just item name), then parse it
                 if (oldItems[element.id] == undefined) { //If we didn't already know about the item, then handle it like a new item
+                    const price = element.note != undefined ? formatPrice(element.note) : 'Price: N/A';
+                    const type = 'Unimplemented';
                     curTab.matches[element.id] = { //First make a new item object and put it in curTab.matches
                         id: element.id,
                         name: element.name,
+                        type,
                         icon: element.icon,
                         ilvl: element.ilvl,
                         corrupted: element.corrupted != undefined ? element.corrupted : false,
+                        shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : 'N/A',
                         modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                         position: [element.x, element.y],
-                        note: element.note != undefined ? formatPrice(element.note) : 'Price: N/A',
+                        note: price,
                         time,
-                        chaos: element.note != undefined ? calculateRawValue(element.note, this.cData) : 'N/A'
+                        chaos: price != 'Price: N/A' ? calculateRawValue(price, this.cData) : 'N/A'
                     } //Then push it to this.nextData.added
                     this.pushToNext({ id: element.id, stashId: curTab.id, acct: curTab.owner, char: curTab.lastChar, stashName: curTab.stashName, item: curTab.matches[element.id] }, 'add');
                 }

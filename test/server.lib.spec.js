@@ -122,13 +122,13 @@ describe('formatPrice Function', () => {
 describe('calculateRawValue Function', () => {
 
     it('The function should return the same value for chaos', () => {
-        expect(calculateRawValue('~price 74 chaos', cData)).to.equal(74);
-        expect(calculateRawValue('~b\\\/o 146 chaos', cData)).to.equal(146);
+        expect(calculateRawValue('Asking price: 74 Chaos', cData)).to.equal(74);
+        expect(calculateRawValue('Fixed price: 146 Chaos', cData)).to.equal(146);
     });
 
     it('The function should return the correct value for exalts', () => {
-        expect(calculateRawValue('~b\\\/o 1 exa', cData)).to.equal(170);
-        expect(calculateRawValue('~price 7.5 exalt', cData)).to.equal(1275);
+        expect(calculateRawValue('Fixed price: 1 Exalted Orb', cData)).to.equal(170);
+        expect(calculateRawValue('Asking price: 7.5 Exalted Orb', cData)).to.equal(1275);
     });
 });
 
@@ -142,7 +142,7 @@ describe('getCurrencyData.js', () => {
 
 let DH = null;
 
-describe('DH Class', () => {
+describe('DataHandler Class with simple name searching', () => {
 
     beforeEach(async () => {
         DH = new DataHandler();
@@ -156,7 +156,7 @@ describe('DH Class', () => {
 
     it('The class should have a setter and getter for the \'watchFor\' attribute, and both should work properly', () => {
         expect(DH.setWatch = { name: 'Voidfletcher' }).to.be.ok;
-        expect(DH.getWatch.toString()).to.equal('function (item) {\ntry {\n\tif(!/^Voidfletcher$/i.test(item.name)) return false;\n} catch(error) {\n\tconsole.log(\'!!!!!!!!!!\');\n\tconsole.log(`Param: name, Element: Voidfletcher`);\n\tconsole.log(`Error: ${error}`);\n\treturn false;\n}\n\nreturn true;\n}');
+        expect(DH.getWatch.toString()).to.equal('function anonymous(item\n) {\nlet i;\ntry {\n\tif(!/^Voidfletcher$/i.test(item.name)) return false;\n} catch(error) {\n\tconsole.log(\'!!!!!!!!!!\');\n\tconsole.log(`Param: name, Element: Voidfletcher`);\n\tconsole.log(`Error: ${error}`);\n\treturn false;\n}\n\nreturn true;\n}');
     });
 
     it('The class should get the nextChangeId from api.poe.watch/id when a watchFor is set', async () => {

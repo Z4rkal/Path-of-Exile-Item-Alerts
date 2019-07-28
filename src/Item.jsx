@@ -41,10 +41,8 @@ class Item extends Component {
 
         return (
             <li className='list-group-item' key={this.props.listing.item.id}>
-                <div className='row'>
-                    <div className='col-sm-auto hidden-xs'>
-                        <img className='img-responsive' src={this.props.listing.item.icon} style={{ marginTop: '6rem', marginLeft: '2rem' }} />
-                    </div>
+                <div className='row h-100'>
+                    <img className='col-sm-auto hidden-xs img-fluid mx-auto my-auto' src={this.props.listing.item.icon} />
                     <div className='col'>
                         <div className='row justify-content-between'>
                             <p className='col-xs-auto'>{this.props.listing.item.corrupted ? (<span style={{ backgroundColor: '#ff6666', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>Corrupted</span>) : null}{this.props.listing.item.name}</p><p style={{ textAlign: 'right' }} className='col-xs-auto' onClick={() => { this.props.updateInput('sortStyle', 'age'); this.props.updateInput('mod', { text: '', pattern: /^$/, numVals: 0, type: '' }); }}><span className='hover'>{formatTime(this.props.listing.item.time)}</span></p>

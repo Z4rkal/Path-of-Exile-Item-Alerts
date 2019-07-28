@@ -1,34 +1,101 @@
 //This will be a class that constructs the search method necessary to match our desired item.
 //It will receive data passed to the server from buildSearchParams on the front end
 
+//A list of valid search parameters, if any other parameters are present in the searchParams object we take in, we'll throw an error
+const VALID_PARAM_KEYS = {
+    name: 'valid uwu',
+    type: 'valid uwu',
+    base: 'valid uwu',
+    sockets: 'valid uwu',
+    links: 'valid uwu',
+    corrupted: 'valid uwu',
+    shaperElder: 'valid uwu',
+    iLvl: 'valid uwu',
+    tier: 'valid uwu',
+    quality: 'valid uwu'
+}
+
+//A list describing the typing/use of valid parameters in buildSearchParams
+const VALID_PARAM_TYPES = {
+    name: 'regex_str',
+    type: 'regex_str',
+    base: 'regex_str',
+    sockets: 'two_num_array',
+    links: 'two_num_array',
+    corrupted: 'bool_str',
+    shaperElder: 'word_str',
+    iLvl: 'two_num_array',
+    tier: 'two_num_array',
+    quality: 'two_num_array'
+}
+
 class SearchHandler {
     constructor() {
-        this.parseItem = function (item) { return false; };
+        this.searchFunction = function (item) { return false; };
     }
 
-    get getParser() {
-        return this.parseItem;
+    get getSearchFunc() {
+        return this.searchFunction;
     }
 
     set newParams(searchParams) {
         try {
+            const validationErr = new Error('The searchParams object contained some invalid keys or values, aborting building a search function for safety');
+
             //First sanitize the input by getting rid of null values
             Object.entries(searchParams).forEach(([param, el]) => {
-                if (el === null || el === '' || ((el[0] === null || el[0] === '') && (el[1] === null || el[1] === ''))) delete searchParams[param];
-                else {
+                if (
+                    el === null
+                    || el === ''
+                    || (typeof (el) === 'object'
+                        && (el[0] === null || el[0] === '')
+                        && (el[1] === null || el[1] === ''))
+                ) delete searchParams[param];
+
+                else if (typeof (el) === 'object') {
                     if (el[0] === '') searchParams[param][0] = null;
                     if (el[1] === '') searchParams[param][1] = null;
                 }
             });
 
-            //Then build the function by evaluating the string literal returned by this.buildSearchFunc
-            eval(`this.parseItem = ${this.buildSearchFunc(searchParams)}`);
+            //Then validate the remaining input for safety
+            Object.entries(searchParams).forEach(([param, el]) => {
+                if (!(VALID_PARAM_KEYS[param] === 'valid uwu')) throw validationErr;
+                switch (VALID_PARAM_TYPES[param]) {
+                    case 'regex_str':
+                        if (typeof (el) !== 'string' || !/^[a-z ']+$/i.test(el)) throw validationErr;
+                        break;
+                    case 'two_num_array':
+                        if (
+                            typeof (el) !== 'object'
+                            || Object.entries(el).length !== 2
+                            || !(/^[0-9]+$/.test(el[0]) || el[0] === null)
+                            || !(/^[0-9]+$/.test(el[1]) || el[1] === null)
+                        ) throw validationErr;
+                        break;
+                    case 'bool_str':
+                        if (typeof (el) !== 'string' || !/^true$|^false$/.test(el)) throw validationErr;
+                        break;
+                    case 'word_str':
+                        if (typeof (el) !== 'string' || !/^[a-z]+$/i.test(el)) throw validationErr;
+                        break;
+                    default:
+                        throw validationErr;
+                }
+            });
+
+            const funcStr = this.buildSearchFunc(searchParams);
+            //Then build the function by constructing a new function from the string literal returned by this.buildSearchFunc
+            this.searchFunction = new Function(['item'], funcStr);
+
             //console.log('::::Completed Function::::');
-            //console.log(this.parseItem.toString());
+            //console.log(this.searchFunction.toString());
         }
         catch (error) {
             console.log(error);
-            console.log(this.buildSearchFunc(searchParams));
+            console.log(`Here's what our function would have looked like:\nfunction anonymous(item\n)\n${this.buildSearchFunc(searchParams)}}`);
+            this.searchFunction = function (item) { return false; };
+            throw new Error(`Throwing upwards, let the client know that something went wrong:\n${error}`);
         }
     }
 
@@ -38,7 +105,7 @@ class SearchHandler {
     //speed is pretty important considering the sheer volume of data from the GGG api that we're searching through
     //Cons: Probably a nightmare to maintain / test, we'll see
     buildSearchFunc(params) {
-        let functionString = 'function (item) { let i;';
+        let functionString = 'let i;';
 
         functionString += Object.entries(params).reduce((a, [param, el]) => {
             if (el == undefined || el == null) return a;
@@ -123,19 +190,19 @@ class SearchHandler {
                     else throw new Error('vewy wong ;w;');
                     break;
                 case 'quality':
-                        a += `\n\tif(item.properties === undefined) return false;`;
-                        a += `\n\tlet i = item.properties.findIndex((el) => el.name === 'Quality'? true : false);`;
-                        a += `\n\tif(i === -1) return false;`;
-                        if (el[0] != null) {
-                            a += `\n\tif(/[0-9]+/.exec(item.properties[i].values[0][0])[0] < ${el[0]}`;
-                            if (el[1] != null)
-                                a += ` || /[0-9]+/.exec(item.properties[i].values[0][0])[0] > ${el[1]}) return false;`;
-                            else a += `) return false;`;
-                        }
-                        else if (el[1] != null) {
-                            a += `\n\tif(/[0-9]+/.exec(item.properties[i].values[0][0])[0] > ${el[1]}) return false;`
-                        }
-                        else throw new Error('vewy wong ;w;');
+                    a += `\n\tif(item.properties === undefined) return false;`;
+                    a += `\n\tlet i = item.properties.findIndex((el) => el.name === 'Quality'? true : false);`;
+                    a += `\n\tif(i === -1) return false;`;
+                    if (el[0] != null) {
+                        a += `\n\tif(/[0-9]+/.exec(item.properties[i].values[0][0])[0] < ${el[0]}`;
+                        if (el[1] != null)
+                            a += ` || /[0-9]+/.exec(item.properties[i].values[0][0])[0] > ${el[1]}) return false;`;
+                        else a += `) return false;`;
+                    }
+                    else if (el[1] != null) {
+                        a += `\n\tif(/[0-9]+/.exec(item.properties[i].values[0][0])[0] > ${el[1]}) return false;`
+                    }
+                    else throw new Error('vewy wong ;w;');
                     break;
                 default:
                     throw new Error(`Error: Invalid search parameter; ${param} is either a bad input or not implemented yet!`)
@@ -147,7 +214,7 @@ class SearchHandler {
             return a;
         }, '');
 
-        functionString += '\nreturn true;\n};';
+        functionString += '\nreturn true;';
 
         return functionString;
     }

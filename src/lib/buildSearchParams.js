@@ -15,8 +15,15 @@ function buildSearchParams(params) {
     };
 
     Object.entries(searchParams).forEach(([param, el]) => {
-        if (el == null || el === '' || (el[0] === '' && el[1] === '')) delete searchParams[param];
-        else {
+        if (
+            el === null
+            || el === ''
+            || (typeof (el) === 'object'
+                && (el[0] === null || el[0] === '')
+                && (el[1] === null || el[1] === ''))
+        ) delete searchParams[param];
+
+        else if (typeof (el) === 'object') {
             if (el[0] === '') searchParams[param][0] = null;
             if (el[1] === '') searchParams[param][1] = null;
         }

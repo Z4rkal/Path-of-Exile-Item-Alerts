@@ -1,15 +1,15 @@
 const formatPrice = require('./formatPrice');
 
-function calculateRawValue(note, cData) {
+function calculateRawValue(price, cData) {
     if (cData == 'No currency data :(') return 'N/A';
 
-    const fullPrice = formatPrice(note);
-    if (fullPrice == 'Price: N/A') return 'N/A'
+    if (price == 'Price: N/A') throw new Error('Don\'t pass a \'Price: N/A\' into calculateRawValue >:(');
 
-    const value = /[0-9.]+/.test(fullPrice) ? parseFloat(/[0-9.]+/.exec(fullPrice)[0]) : null;
-    if (value == null) return 'N/A';
-    const type = /[0-9] ([a-z ]+)/i.test(fullPrice) ? /[0-9] ([a-z ]+)/i.exec(fullPrice)[1] : null;
-    if (type == null) return 'N/A';
+    const priceReg = /(\.?[0-9]+|[0-9]+\.[0-9]+)\.? ([a-z ']+)$/i
+    if (!priceReg.test(price)) return 'N/A';
+
+    const value = parseFloat(priceReg.exec(price)[1]);
+    const type = priceReg.exec(price)[2];
 
     if (type === 'Chaos') return value;
 

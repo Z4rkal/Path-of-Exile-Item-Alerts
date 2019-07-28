@@ -30,7 +30,7 @@ class SearchForm extends Component {
                 <div className='card-body'>
                     <label htmlFor='search-bar' className='control-label'>Enter the name of the item you would like to watch for:</label>
                     <input id='search-bar' className='form-control' type='text' value={this.state.name} onChange={(e) => this.updateInput('name', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
-                    <div id='advanced-form' className={this.props.advanced ? 'show' : ''}>
+                    <div id='advanced-form' className={this.props.advanced ? 'show' : ''} style={{marginTop: '0.25rem'}}>
                         <label htmlFor='type-bar' className='control-label'>Enter the type of item you would like to watch for:</label>
                         <input id='type-bar' className='form-control' type='text' value={this.state.type} onChange={(e) => this.updateInput('type', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
                         <label htmlFor='base-bar' className='control-label'>Enter the item base you would like to watch for:</label>

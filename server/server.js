@@ -41,9 +41,9 @@ app.post('/api/search', (req, res) => {
     try {
         //Data.setWatch = decodeURI(/id\=([^\&]+)/.exec(req.url)[1]);
         console.log(req.body);
-        Data.setWatch = req.body
+        Data.setWatch = req.body;
         resStatus = 200;
-        resMessage = `Received request to begin searching for '${Data.getWatch}'`;
+        resMessage = `Received request to begin searching for '${JSON.stringify(req.body)}'`;
     }
     catch (err) {
         console.log(`Invalid post at /api/search from ${req.url}`);
