@@ -21,8 +21,6 @@ String.prototype.hashCode = function () {
     return hash;
 }
 
-
-
 class App extends Component {
     constructor() {
         super();
