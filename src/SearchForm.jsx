@@ -12,6 +12,7 @@ class SearchForm extends Component {
             links: ['', ''],
             corrupted: 'N/A',
             shaperElder: 'N/A',
+            rarity: 'N/A',
             iLvl: ['', ''],
             tier: ['', ''],
             quality: ['', '']
@@ -58,24 +59,6 @@ class SearchForm extends Component {
                                     </li>
                                 </ul>
                             </div>
-                            <div className='form-group col-xs-1'>
-                                <label htmlFor='corrupted-select' className='control-label'>Corrupted:</label>
-                                <select id='corrupted-select' className='form-control' value={this.state.corrupted} onChange={(e) => this.updateInput('corrupted', e.target.value)}>
-                                    <option value={true}>True</option>
-                                    <option value={false}>False</option>
-                                    <option value={'N/A'}>N/A</option>
-                                </select>
-                            </div>
-                            <div className='form-group col-xs-1'>
-                                <label htmlFor='shaper-elder-select' className='control-label'>Shaper/Elder:</label>
-                                <select id='shaper-elder-select' className='form-control' value={this.state.shaperElder} onChange={(e) => this.updateInput('shaperElder', e.target.value)}>
-                                    <option value={'shaper'}>Shaper</option>
-                                    <option value={'elder'}>Elder</option>
-                                    <option value={'either'}>Either</option>
-                                    <option value={'neither'}>Neither</option>
-                                    <option value={'N/A'}>N/A</option>
-                                </select>
-                            </div>
                             <div className='form-group col-xs-2'>
                                 <label htmlFor='ilvl-bar' className='control-label'>iLvl:</label>
                                 <ul id='ilvl-bar' className='list-group list-group-horizontal'>
@@ -108,6 +91,35 @@ class SearchForm extends Component {
                                         <input style={{ width: '100%', height: '100%' }} type='number' value={this.state.quality[1]} onChange={(e) => this.updateInput('quality', [this.state.quality[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
                                     </li>
                                 </ul>
+                            </div>
+                            <div className='form-group col-xs-1'>
+                                <label htmlFor='corrupted-select' className='control-label'>Corrupted:</label>
+                                <select id='corrupted-select' className='form-control search-select px-1' value={this.state.corrupted} onChange={(e) => this.updateInput('corrupted', e.target.value)}>
+                                    <option value={true}>True</option>
+                                    <option value={false}>False</option>
+                                    <option value={'N/A'}>N/A</option>
+                                </select>
+                            </div>
+                            <div className='form-group col-xs-1'>
+                                <label htmlFor='shaper-elder-select' className='control-label'>Shaper/Elder:</label>
+                                <select id='shaper-elder-select' className='form-control search-select px-1' value={this.state.shaperElder} onChange={(e) => this.updateInput('shaperElder', e.target.value)}>
+                                    <option value={'shaper'}>Shaper</option>
+                                    <option value={'elder'}>Elder</option>
+                                    <option value={'either'}>Either</option>
+                                    <option value={'neither'}>Neither</option>
+                                    <option value={'N/A'}>N/A</option>
+                                </select>
+                            </div>
+                            <div className='form-group col-xs-1'>
+                                <label htmlFor='rarity-select' className='control-label'>Rarity:</label>
+                                <select id='rarity-select' className='form-control search-select px-1' value={this.state.rarity} onChange={(e) => this.updateInput('rarity', e.target.value)}>
+                                    <option value={'normal'}>Normal</option>
+                                    <option value={'magic'}>Magic</option>
+                                    <option value={'rare'}>Rare</option>
+                                    <option value={'unique'}>Unique</option>
+                                    <option value={'non-unique'}>Non-Unique</option>
+                                    <option value={'N/A'}>N/A</option>
+                                </select>
                             </div>
                         </div>
                     </div>

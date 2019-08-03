@@ -42,10 +42,15 @@ class Item extends Component {
         return (
             <li className='list-group-item' key={this.props.listing.item.id}>
                 <div className='row h-100'>
-                    <img className='col-sm-auto hidden-xs img-fluid mx-auto my-auto' src={this.props.listing.item.icon} />
+                    <img className='col-sm-auto hidden-xs-down img-fluid mx-auto my-auto' src={this.props.listing.item.icon} />
                     <div className='col'>
                         <div className='row justify-content-between'>
-                            <p className='col-xs-auto'>{this.props.listing.item.corrupted ? (<span style={{ backgroundColor: '#ff6666', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>Corrupted</span>) : null}{this.props.listing.item.name}</p><p style={{ textAlign: 'right' }} className='col-xs-auto' onClick={() => { this.props.updateInput('sortStyle', 'age'); this.props.updateInput('mod', { text: '', pattern: /^$/, numVals: 0, type: '' }); }}><span className='hover'>{formatTime(this.props.listing.item.time)}</span></p>
+                            <p className='col-xs-auto'>
+                                {this.props.listing.item.corrupted ? (<span style={{ backgroundColor: '#ff6666', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>Corrupted</span>) : null}
+                                {this.props.listing.item.shaperElder ? (<span style={this.props.listing.item.shaperElder == 'shaper' ? { backgroundColor: '#9a669a', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' } : { backgroundColor: '#444444', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>{this.props.listing.item.shaperElder == 'shaper' ? `Shaped` : `Elder`}</span>) : null}
+                                {this.props.listing.item.name ? (`${this.props.listing.item.name}, ${this.props.listing.item.type}`) : (`${this.props.listing.item.type}`)}
+                            </p>
+                            <p style={{ textAlign: 'right' }} className='col-xs-auto' onClick={() => { this.props.updateInput('sortStyle', 'age'); this.props.updateInput('mod', { text: '', pattern: /^$/, numVals: 0, type: '' }); }}><span className='hover'>{formatTime(this.props.listing.item.time)}</span></p>
                         </div>
                         <div className='row'>
                             <ItemMods id={this.props.listing.id} modifiers={this.props.listing.item.modifiers} updateInput={this.props.updateInput} mod={this.props.mod} />

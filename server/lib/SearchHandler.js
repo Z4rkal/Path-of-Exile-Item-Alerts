@@ -2,21 +2,7 @@
 //It will receive data passed to the server from buildSearchParams on the front end
 
 //A list of valid search parameters, if any other parameters are present in the searchParams object we take in, we'll throw an error
-const VALID_PARAM_KEYS = {
-    name: 'valid uwu',
-    type: 'valid uwu',
-    base: 'valid uwu',
-    sockets: 'valid uwu',
-    links: 'valid uwu',
-    corrupted: 'valid uwu',
-    shaperElder: 'valid uwu',
-    iLvl: 'valid uwu',
-    tier: 'valid uwu',
-    quality: 'valid uwu'
-}
-
-//A list describing the typing/use of valid parameters in buildSearchParams
-const VALID_PARAM_TYPES = {
+const VALID_PARAMS = {
     name: 'regex_str',
     type: 'regex_str',
     base: 'regex_str',
@@ -24,6 +10,7 @@ const VALID_PARAM_TYPES = {
     links: 'two_num_array',
     corrupted: 'bool_str',
     shaperElder: 'word_str',
+    rarity: 'word_str',
     iLvl: 'two_num_array',
     tier: 'two_num_array',
     quality: 'two_num_array'
@@ -60,8 +47,8 @@ class SearchHandler {
 
             //Then validate the remaining input for safety
             Object.entries(searchParams).forEach(([param, el]) => {
-                if (!(VALID_PARAM_KEYS[param] === 'valid uwu')) throw validationErr;
-                switch (VALID_PARAM_TYPES[param]) {
+                if (!VALID_PARAMS[param]) throw validationErr;
+                switch (VALID_PARAMS[param]) {
                     case 'regex_str':
                         if (typeof (el) !== 'string' || !/^[a-z ']+$/i.test(el)) throw validationErr;
                         break;
@@ -77,7 +64,7 @@ class SearchHandler {
                         if (typeof (el) !== 'string' || !/^true$|^false$/.test(el)) throw validationErr;
                         break;
                     case 'word_str':
-                        if (typeof (el) !== 'string' || !/^[a-z]+$/i.test(el)) throw validationErr;
+                        if (typeof (el) !== 'string' || !/^[a-z]+(?:\-[a-z]+)*$/i.test(el)) throw validationErr;
                         break;
                     default:
                         throw validationErr;
@@ -103,6 +90,7 @@ class SearchHandler {
     //This is probably horrible code but it sounded like a really cool idea so I wanted to write it this way just to see if I could get it to work.
     //Pros: The function it builds should be somewhat faster than a generic catchall that checks every possible search term,
     //speed is pretty important considering the sheer volume of data from the GGG api that we're searching through
+    //Doing it this way should also make it significantly easier to build modular searches for different sets of item modifiers later
     //Cons: Probably a nightmare to maintain / test, we'll see
     buildSearchFunc(params) {
         let functionString = 'let i;';
@@ -164,6 +152,26 @@ class SearchHandler {
                             a += `\n\tif (item.shaper || item.elder) return false;`;
                             break;
                         default: throw new Error('Bad shaperElder input >:(');
+                    }
+                    break;
+                case 'rarity':
+                    switch (el) {
+                        case 'normal':
+                            a += `\n\tif (item.frameType != 0 || Object.keys(item.category)[1] == 'currency') return false;`
+                            break;
+                        case 'magic':
+                            a += `\n\tif (item.frameType != 1) return false;`
+                            break;
+                        case 'rare':
+                            a += `\n\tif (item.frameType != 2 || !item.name || !/[a-z]+ [a-z]+/i.test(item.name)) return false;`
+                            break;
+                        case 'unique':
+                            a += `\n\tif (item.frameType != 3) return false;`
+                            break;
+                        case 'non-unique':
+                            a += `\n\tif (item.frameType != 2) return false`
+                            break;
+                        default: throw new Error('Bad rarity input >:(');
                     }
                     break;
                 case 'iLvl':
@@ -281,5 +289,47 @@ module.exports = SearchHandler;
     "x": 2, "y": 0,
     "inventoryId": "Stash3",
     "socketedItems": []
+}
+*/
+
+/* Example Exquisite Blade
+{
+    "verified":false,
+    "w":2,"h":4,
+    "ilvl":83,
+    "icon":"https:\/\/web.poecdn.com\/image\/Art\/2DItems\/Weapons\/TwoHandWeapons\/TwoHandSwords\/TwoHandSword8.png?scale=1&w=2&h=4&v=44d717ffd2668094350ae6065f0f3b62","league":"Legion","id":"25cb0942eabb7babe7e310350c75fc4bce3177be2670c218c2a226999f865b3c",
+    "sockets":[{"group":0,"attr":"D","sColour":"G"},{"group":0,"attr":"S","sColour":"R"}],
+    "name":"Gale Thirst",
+    "typeLine":"Exquisite Blade",
+    "identified":true,
+    "note":"~price 2 chaos",
+    "properties":
+    [
+        {"name":"Two Handed Sword","values":[],"displayMode":0},
+        {"name":"Physical Damage","values":[["56-94",0]],"displayMode":0,"type":9},
+        {"name":"Elemental Damage","values":[["64-111",4]],"displayMode":0,"type":10},
+        {"name":"Critical Strike Chance","values":[["6.96%",1]],"displayMode":0,"type":12},
+        {"name":"Attacks per Second","values":[["1.35",0]],"displayMode":0,"type":13},
+        {"name":"Weapon Range","values":[["13",0]],"displayMode":0,"type":14}
+    ],
+    "requirements":
+    [
+        {"name":"Level","values":[["70",0]],"displayMode":0},
+        {"name":"Str","values":[["119",0]],"displayMode":1},
+        {"name":"Dex","values":[["131",0]],"displayMode":1}
+    ],
+    "implicitMods":["+60% to Global Critical Strike Multiplier"],
+    "explicitMods":
+    [
+        "+16 to Strength",
+        "Adds 64 to 111 Fire Damage",
+        "16% increased Critical Strike Chance",
+        "+5 Life gained on Kill"
+    ],
+    "frameType":2,
+    "category":{"weapons":["twosword"]},
+    "x":22,"y":17,
+    "inventoryId":"Stash80",
+    "socketedItems":[]
 }
 */

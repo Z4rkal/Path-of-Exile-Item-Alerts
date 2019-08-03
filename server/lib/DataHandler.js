@@ -160,15 +160,14 @@ class DataHandler {
         tab.items.forEach((element) => { //Go through the tab item by item
             if (this.watchFor(element)) { //If an item matches our search (currently just item name)
                 const price = element.note != undefined ? formatPrice(element.note) : 'Price: N/A';
-                const type = 'Unimplemented';
                 newTab.matches[element.id] = { //Then make a new item object and put it in newTab.matches
                     id: element.id,
                     name: element.name,
-                    type,
+                    type: element.typeLine,
                     icon: element.icon, //The ingame sprite
                     ilvl: element.ilvl,
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
-                    shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : 'N/A',
+                    shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : false,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y], //Position in the stash tab
                     note: price, //The price listing
@@ -201,11 +200,10 @@ class DataHandler {
             if (this.watchFor(element)) { //If an item matches our search (currently just item name), then parse it
                 if (oldItems[element.id] == undefined) { //If we didn't already know about the item, then handle it like a new item
                     const price = element.note != undefined ? formatPrice(element.note) : 'Price: N/A';
-                    const type = 'Unimplemented';
                     curTab.matches[element.id] = { //First make a new item object and put it in curTab.matches
                         id: element.id,
                         name: element.name,
-                        type,
+                        type: element.typeLine,
                         icon: element.icon,
                         ilvl: element.ilvl,
                         corrupted: element.corrupted != undefined ? element.corrupted : false,

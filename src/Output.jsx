@@ -16,43 +16,49 @@ class Output extends Component {
         let mod1 = null;
         let mod2 = null;
 
-        switch (mod.type) {
-            case 'implicit':
+        try {
+            switch (mod.type) {
+                case 'implicit':
+                    if (a.item.modifiers.implicit)
+                        for (let i = 0; i < a.item.modifiers.implicit.length; i++) {
+                            if (mod.pattern.test(a.item.modifiers.implicit[i])) { mod1 = a.item.modifiers.implicit[i]; break; }
+                        }
 
-                for (let i = 0; i < a.item.modifiers.implicit.length; i++) {
-                    if (mod.pattern.test(a.item.modifiers.implicit[i])) { mod1 = a.item.modifiers.implicit[i]; break; }
-                }
+                    if (b.item.modifiers.implicit)
+                        for (let i = 0; i < b.item.modifiers.implicit.length; i++) {
+                            if (mod.pattern.test(b.item.modifiers.implicit[i])) { mod2 = b.item.modifiers.implicit[i]; break; }
+                        }
 
-                for (let i = 0; i < b.item.modifiers.implicit.length; i++) {
-                    if (mod.pattern.test(b.item.modifiers.implicit[i])) { mod2 = b.item.modifiers.implicit[i]; break; }
-                }
+                    break;
+                case 'explicit':
+                    if (a.item.modifiers.explicit)
+                        for (let i = 0; i < a.item.modifiers.explicit.length; i++) {
+                            if (mod.pattern.test(a.item.modifiers.explicit[i])) { mod1 = a.item.modifiers.explicit[i]; break; }
+                        }
 
-                break;
-            case 'explicit':
+                    if (b.item.modifiers.explicit)
+                        for (let i = 0; i < b.item.modifiers.explicit.length; i++) {
+                            if (mod.pattern.test(b.item.modifiers.explicit[i])) { mod2 = b.item.modifiers.explicit[i]; break; }
+                        }
 
-                for (let i = 0; i < a.item.modifiers.explicit.length; i++) {
-                    if (mod.pattern.test(a.item.modifiers.explicit[i])) { mod1 = a.item.modifiers.explicit[i]; break; }
-                }
+                    break;
+                case 'crafted':
+                    if (a.item.modifiers.crafted)
+                        for (let i = 0; i < a.item.modifiers.crafted.length; i++) {
+                            if (mod.pattern.test(a.item.modifiers.crafted[i])) { mod1 = a.item.modifiers.crafted[i]; break; }
+                        }
 
+                    if (b.item.modifiers.crafted)
+                        for (let i = 0; i < b.item.modifiers.crafted.length; i++) {
+                            if (mod.pattern.test(b.item.modifiers.crafted[i])) { mod2 = b.item.modifiers.crafted[i]; break; }
+                        }
 
-                for (let i = 0; i < b.item.modifiers.explicit.length; i++) {
-                    if (mod.pattern.test(b.item.modifiers.explicit[i])) { mod2 = b.item.modifiers.explicit[i]; break; }
-                }
-
-                break;
-            case 'crafted':
-
-                for (let i = 0; i < a.item.modifiers.crafted.length; i++) {
-                    if (mod.pattern.test(a.item.modifiers.crafted[i])) { mod1 = a.item.modifiers.crafted[i]; break; }
-                }
-
-
-                for (let i = 0; i < b.item.modifiers.crafted.length; i++) {
-                    if (mod.pattern.test(b.item.modifiers.crafted[i])) { mod2 = b.item.modifiers.crafted[i]; break; }
-                }
-
-                break;
-            default: console.log(`${mod.pattern} ${mod.text} ${mod.type}`)
+                    break;
+                default: console.log(`${mod.pattern} ${mod.text} ${mod.type}`)
+            }
+        }
+        catch (err) {
+            console.log(err);
         }
 
         if (mod2 != null && mod1 == null) return 1;
@@ -72,6 +78,7 @@ class Output extends Component {
                 val2 = mod2.match(numPat);
                 break;
             case 2:
+            case 3: //For now just assume something with 3 nums is something like x to x damage per x stat, and assume the 'x stat' doesn't vary
                 val1 = mod1.match(numPat);
                 val1 = (parseFloat(val1[0]) + parseFloat(val1[1])) / 2;
 
@@ -123,7 +130,7 @@ class Output extends Component {
                     </div>
                 </div>
             );
-        return ( this.props.searching ?
+        return (this.props.searching ?
             <div className='card' style={{ borderColor: '#9dc8d6' }}>
                 <div className='card-header' style={{ color: '#333333', backgroundColor: '#add8e6' }}>Waiting for results from server; tabs parsed: {this.props.numParsed}</div>
             </div> : <div></div>
