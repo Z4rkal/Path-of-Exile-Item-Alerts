@@ -1,5 +1,5 @@
 const axios = require('axios');
-const curTypes = require('./currencyTypes');
+const curTypes = require('../configs/currencyTypes');
 
 async function getCurrencyData(league) {
 

@@ -1,4 +1,4 @@
-const curTypes = Object.entries(require('./currencyTypes'));
+const curTypes = Object.entries(require('../configs/currencyTypes'));
 
 function extractPrice(note) {
     let result = '';

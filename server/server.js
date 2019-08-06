@@ -1,7 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
-const DataHandler = require('./lib/DataHandler');
-const getCurrencyData = require('./lib/getCurrencyData');
+const DataHandler = require('./lib/classes/DataHandler');
 const { json } = require('body-parser')
 
 const app = express();

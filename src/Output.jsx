@@ -93,18 +93,17 @@ class Output extends Component {
     }
 
     sortByProp(a, b, prop) {
-        //TODO Implement prop sorting, sorta half implemented right now
         let prop1 = null;
         let prop2 = null;
 
         try {
             if (a.item.properties)
                 for (let i = 0; i < a.item.properties.length; i++) {
-                    if (a.item.properties[i].name === prop) { prop1 = parseFloat(a.item.properties[i].values[0][0].replace(/[^0-9\.]+/g, '')); break; }
+                    if (a.item.properties[i].name === prop) { prop1 = a.item.properties[i].value; break; }
                 }
             if (b.item.properties)
                 for (let i = 0; i < b.item.properties.length; i++) {
-                    if (b.item.properties[i].name === prop) { prop2 = parseFloat(b.item.properties[i].values[0][0].replace(/[^0-9\.]+/g, '')); break; }
+                    if (b.item.properties[i].name === prop) { prop2 = b.item.properties[i].value; break; }
                 }
         }
         catch (err) {

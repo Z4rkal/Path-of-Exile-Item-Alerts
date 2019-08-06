@@ -3,11 +3,11 @@ const { expect } = require('chai');
 const sinon = require("sinon");
 const sinonChai = require("sinon-chai");
 
-const extractPrice = require('../server/lib/extractPrice');
-const formatPrice = require('../server/lib/formatPrice');
-const calculateRawValue = require('../server/lib/calculateRawValue');
-const getCurrencyData = require('../server/lib/getCurrencyData');
-const DataHandler = require('../server/lib/DataHandler');
+const extractPrice = require('../server/lib/functions/extractPrice');
+const formatPrice = require('../server/lib/functions/formatPrice');
+const calculateRawValue = require('../server/lib/functions/calculateRawValue');
+const getCurrencyData = require('../server/lib/functions/getCurrencyData');
+const DataHandler = require('../server/lib/classes/DataHandler');
 
 const axios = require('axios');
 const MockAdapter = require('axios-mock-adapter');

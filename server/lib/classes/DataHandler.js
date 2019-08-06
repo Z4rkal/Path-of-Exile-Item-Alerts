@@ -1,8 +1,10 @@
 const axios = require('axios');
-const formatPrice = require('./formatPrice');
-const getCurrencyData = require('./getCurrencyData');
-const calculateRawValue = require('./calculateRawValue');
+const formatPrice = require('../functions/formatPrice');
+const getCurrencyData = require('../functions/getCurrencyData');
+const calculateRawValue = require('../functions/calculateRawValue');
 const SearchHandler = require('./SearchHandler');
+const extractPropertyValue = require('../functions/extractPropertyValue');
+const VALID_PROPERTIES = require('../configs/propertyConfigBackend');
 
 //This class will handle all of the item and currency data for the server
 class DataHandler {
@@ -164,12 +166,11 @@ class DataHandler {
                     id: element.id,
                     name: element.name,
                     type: element.typeLine,
-                    category: element.category,
                     icon: element.icon, //The ingame sprite
                     ilvl: element.ilvl,
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
                     shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : false,
-                    properties: element.properties,
+                    properties: element.properties ? this.handleItemProperties(element.properties) : undefined,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y], //Position in the stash tab
                     note: price, //The price listing
@@ -206,12 +207,11 @@ class DataHandler {
                         id: element.id,
                         name: element.name,
                         type: element.typeLine,
-                        category: element.category,
                         icon: element.icon,
                         ilvl: element.ilvl,
                         corrupted: element.corrupted != undefined ? element.corrupted : false,
                         shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : false,
-                        properties: element.properties,
+                        properties: element.properties ? this.handleItemProperties(element.properties) : undefined,
                         modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                         position: [element.x, element.y],
                         note: price,
@@ -259,6 +259,59 @@ class DataHandler {
             default: //if this somehow gets called with a bad option, then throw some nonsense
                 throw new Error('Heckin busted');
         }
+    }
+
+    handleItemProperties(properties) {
+        let parsedPropertiesToSave = [];
+
+        let damageProps = {};
+
+        properties.map((property) => {
+            if (VALID_PROPERTIES[property.name]) {
+                parsedPropertiesToSave.push({ name: property.name, value: extractPropertyValue(property, VALID_PROPERTIES[property.name]) });
+                if (property.name === 'Physical Damage')
+                    damageProps.phys = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                else if (property.name === 'Elemental Damage')
+                    damageProps.ele = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                else if (property.name === 'Chaos Damage')
+                    damageProps.chaos = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                else if (property.name === 'Attacks per Second')
+                    damageProps.speed = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+            }
+
+            return null;
+        });
+
+        let val = 0;
+
+        if (damageProps.phys && damageProps.speed) {
+
+            val = Math.round(damageProps.phys * damageProps.speed * 100) / 100;
+
+            parsedPropertiesToSave.push({ name: 'Physical Damage per Second', value: val });
+        }
+
+        if (damageProps.ele && damageProps.speed) {
+
+            val = Math.round(damageProps.ele * damageProps.speed * 100) / 100;
+
+            parsedPropertiesToSave.push({ name: 'Elemental Damage per Second', value: val });
+        }
+
+        if ((damageProps.phys || damageProps.ele || damageProps.chaos) && damageProps.speed) {
+
+            val = Math.round(
+                (
+                    (damageProps.phys ? damageProps.phys : 0)
+                    + (damageProps.ele ? damageProps.ele : 0)
+                    + (damageProps.chaos ? damageProps.chaos : 0)
+                )
+                * damageProps.speed * 100) / 100;
+
+            parsedPropertiesToSave.push({ name: 'Damage per Second', value: val });
+        }
+
+        return parsedPropertiesToSave;
     }
 }
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import buildSearchParams from './lib/buildSearchParams';
+import buildSearchParams from './lib/functions/buildSearchParams';
 
 class SearchForm extends Component {
     constructor() {

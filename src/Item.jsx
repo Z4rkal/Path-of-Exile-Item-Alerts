@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import formatTime from './lib/formatTime';
+import formatTime from './lib/functions/formatTime';
 import ItemMods from './ItemMods';
 import ItemProps from './ItemProps';
 
@@ -64,7 +64,7 @@ class Item extends Component {
                                 <ItemMods id={this.props.listing.id} modifiers={this.props.listing.item.modifiers} updateInput={this.props.updateInput} mod={this.props.mod} />
                             </div>
                             {this.props.listing.item.properties ? <div className='col'>
-                                <ItemProps id={this.props.listing.id} properties={this.props.listing.item.properties} category={this.props.listing.item.category} updateInput={this.props.updateInput} prop={this.props.prop} />
+                                <ItemProps id={this.props.listing.id} properties={this.props.listing.item.properties} updateInput={this.props.updateInput} prop={this.props.prop} />
                             </div> : null}
                         </div>
                         <div className='row'>
