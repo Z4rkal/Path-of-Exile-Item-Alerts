@@ -333,3 +333,35 @@ module.exports = SearchHandler;
     "socketedItems":[]
 }
 */
+
+/* Example Skill Gem
+{
+    "verified":false,
+    "w":1,"h":1,
+    "ilvl":0,
+    "icon":"https:\/\/web.poecdn.com\/image\/Art\/2DItems\/Gems\/Flammability.png?scale=1&w=1&h=1&v=6fbf7cfcddcc267b1f44fb84314dbe04",
+    "support":false,
+    "league":"Legion",
+    "id":"dc484b6a2c5992768f47a7b5c613456bcaaf219d8f4231ed7ca161c2f9d25eb9",
+    "name":"",
+    "typeLine":"Flammability",
+    "identified":true,
+    "properties":
+    [
+        {"name":"Spell, AoE, Duration, Curse, Fire","values":[],"displayMode":0},
+        {"name":"Level","values":[["1",0]],"displayMode":0,"type":5},
+        {"name":"Mana Cost","values":[["24",0]],"displayMode":0},
+        {"name":"Cast Time","values":[["0.50 sec",0]],"displayMode":0},
+        {"name":"Quality","values":[["+8%",1]],"displayMode":0,"type":6}
+    ],
+    "additionalProperties":[{"name":"Experience","values":[["1\/118383",0]],"displayMode":2,"progress":8.447158506896812e-6,"type":20}],
+    "requirements":[{"name":"Level","values":[["24",0]],"displayMode":0},{"name":"Str","values":[["25",0]],"displayMode":1},{"name":"Int","values":[["37",0]],"displayMode":1}],
+    "secDescrText":"Curses all targets in an area, making them less resistant to fire damage and giving them a chance to be ignited by fire damage.",
+    "explicitMods":["Base duration is 9.00 seconds","Cursed enemies have -25% to Fire Resistance","Cursed enemies have +10% chance to be Ignited by Fire Damage","Ignite on Cursed enemies has 4% increased Duration"],
+    "descrText":"Place into an item socket of the right colour to gain this skill. Right click to remove from a socket.",
+    "frameType":4,
+    "category":{"gems":["activegem"]},
+    "x":3,"y":4,
+    "inventoryId":"Stash44"
+}
+*/

@@ -164,10 +164,12 @@ class DataHandler {
                     id: element.id,
                     name: element.name,
                     type: element.typeLine,
+                    category: element.category,
                     icon: element.icon, //The ingame sprite
                     ilvl: element.ilvl,
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
                     shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : false,
+                    properties: element.properties,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y], //Position in the stash tab
                     note: price, //The price listing
@@ -204,10 +206,12 @@ class DataHandler {
                         id: element.id,
                         name: element.name,
                         type: element.typeLine,
+                        category: element.category,
                         icon: element.icon,
                         ilvl: element.ilvl,
                         corrupted: element.corrupted != undefined ? element.corrupted : false,
-                        shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : 'N/A',
+                        shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : false,
+                        properties: element.properties,
                         modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                         position: [element.x, element.y],
                         note: price,

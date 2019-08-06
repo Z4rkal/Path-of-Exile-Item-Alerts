@@ -92,23 +92,53 @@ class Output extends Component {
         return val2 - val1;
     }
 
-    buildItems() {
+    sortByProp(a, b, prop) {
+        //TODO Implement prop sorting, sorta half implemented right now
+        let prop1 = null;
+        let prop2 = null;
+
+        try {
+            if (a.item.properties)
+                for (let i = 0; i < a.item.properties.length; i++) {
+                    if (a.item.properties[i].name === prop) { prop1 = parseFloat(a.item.properties[i].values[0][0].replace(/[^0-9\.]+/g, '')); break; }
+                }
+            if (b.item.properties)
+                for (let i = 0; i < b.item.properties.length; i++) {
+                    if (b.item.properties[i].name === prop) { prop2 = parseFloat(b.item.properties[i].values[0][0].replace(/[^0-9\.]+/g, '')); break; }
+                }
+        }
+        catch (err) {
+            console.log(err);
+        }
+
+        if (prop2 != null && prop1 == null) return 1;
+        if (prop2 == null && prop1 != null) return -1;
+        if (prop2 == null && prop1 == null) return b.item.time - a.item.time;
+
+        return prop2 - prop1;
+    }
+
+    buildItems() { //TODO Cap the amount of listings to show so we can hold more data in the state without flooding the screen
         if (this.props.sortStyle == 'age')
             return (Object.entries(this.props.results).sort(([, a], [, b]) => (b.item.time - a.item.time)).map(([, element]) => (
-                <Item key={element.id} league={this.props.league} listing={element} updateInput={this.props.updateInput} mod={this.props.mod} />
+                <Item key={element.id} league={this.props.league} listing={element} updateInput={this.props.updateInput} mod={this.props.mod} prop={this.props.prop} />
             )));
         else if (this.props.sortStyle == 'price')
             return (Object.entries(this.props.results).sort(([, a], [, b]) => this.sortByPrice(a, b)).map(([, element]) => (
-                <Item key={element.id} league={this.props.league} listing={element} updateInput={this.props.updateInput} mod={this.props.mod} />
+                <Item key={element.id} league={this.props.league} listing={element} updateInput={this.props.updateInput} mod={this.props.mod} prop={this.props.prop} />
             )));
         else if (this.props.sortStyle == 'modifier')
             return (Object.entries(this.props.results).sort(([, a], [, b]) => this.sortByMod(a, b, this.props.mod)).map(([, element]) => (
-                <Item key={element.id} league={this.props.league} listing={element} updateInput={this.props.updateInput} mod={this.props.mod} />
+                <Item key={element.id} league={this.props.league} listing={element} updateInput={this.props.updateInput} mod={this.props.mod} prop={this.props.prop} />
+            )));
+        else if (this.props.sortStyle == 'property')
+            return (Object.entries(this.props.results).sort(([, a], [, b]) => this.sortByProp(a, b, this.props.prop)).map(([, element]) => (
+                <Item key={element.id} league={this.props.league} listing={element} updateInput={this.props.updateInput} mod={this.props.mod} prop={this.props.prop} />
             )));
 
         //Default to age, just in case
         return (Object.entries(this.props.results).sort(([, a], [, b]) => (b.item.time - a.item.time)).map(([, element]) => (
-            <Item key={element.id} league={this.props.league} listing={element} updateInput={this.props.updateInput} mod={this.props.mod} />
+            <Item key={element.id} league={this.props.league} listing={element} updateInput={this.props.updateInput} mod={this.props.mod} prop={this.props.prop} />
         )));
     }
 

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import formatTime from './lib/formatTime';
 import ItemMods from './ItemMods';
+import ItemProps from './ItemProps';
 
 class Item extends Component {
     constructor(props) {
@@ -13,8 +14,14 @@ class Item extends Component {
         }
     }
 
-    componentWillMount() {
+    componentDidMount() {
         this.makeWhisper(this.props.listing);
+    }
+
+    setSort(type) {
+        this.props.updateInput('mod', { text: '', pattern: /^$/, numVals: 0, type: '' });
+        this.props.updateInput('prop', '');
+        this.props.updateInput('sortStyle', type);
     }
 
     makeWhisper(listing) {
@@ -42,7 +49,7 @@ class Item extends Component {
         return (
             <li className='list-group-item' key={this.props.listing.item.id}>
                 <div className='row h-100'>
-                    <img className='col-sm-auto hidden-xs-down img-fluid mx-auto my-auto' src={this.props.listing.item.icon} />
+                    <img className='col-sm-auto d-none d-sm-flex img-fluid mx-auto my-auto' src={this.props.listing.item.icon} />
                     <div className='col'>
                         <div className='row justify-content-between'>
                             <p className='col-xs-auto'>
@@ -50,14 +57,19 @@ class Item extends Component {
                                 {this.props.listing.item.shaperElder ? (<span style={this.props.listing.item.shaperElder == 'shaper' ? { backgroundColor: '#9a669a', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' } : { backgroundColor: '#444444', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>{this.props.listing.item.shaperElder == 'shaper' ? `Shaped` : `Elder`}</span>) : null}
                                 {this.props.listing.item.name ? (`${this.props.listing.item.name}, ${this.props.listing.item.type}`) : (`${this.props.listing.item.type}`)}
                             </p>
-                            <p style={{ textAlign: 'right' }} className='col-xs-auto' onClick={() => { this.props.updateInput('sortStyle', 'age'); this.props.updateInput('mod', { text: '', pattern: /^$/, numVals: 0, type: '' }); }}><span className='hover'>{formatTime(this.props.listing.item.time)}</span></p>
-                        </div>
-                        <div className='row'>
-                            <ItemMods id={this.props.listing.id} modifiers={this.props.listing.item.modifiers} updateInput={this.props.updateInput} mod={this.props.mod} />
+                            <p style={{ textAlign: 'right' }} className='col-xs-auto' onClick={() => this.setSort('age')}><span className='hover'>{formatTime(this.props.listing.item.time)}</span></p>
                         </div>
                         <div className='row'>
                             <div className='col-xs-auto'>
-                                <p style={{ marginTop: '1rem' }}><span className='hover' onClick={() => { this.props.updateInput('sortStyle', 'price'); this.props.updateInput('mod', { text: '', pattern: /^$/, numVals: 0, type: '' }); }}>{this.props.listing.item.note}</span> | IGN: {this.props.listing.char} | <a href={`https://www.pathofexile.com/account/view-profile/${this.props.listing.acct}`} style={{ color: '#ff4444' }}>Profile</a>{this.state.whisper != null ? (<span> | <CopyToClipboard text={this.state.whisper} onCopy={() => this.setState({ copied: true })}>{this.state.copied == false ? <span style={{ color: '#ff4444' }}>Whisper</span> : <span style={{ color: '#ff4444' }}>Copied to Clipboard</span>}</CopyToClipboard></span>) : null}</p>
+                                <ItemMods id={this.props.listing.id} modifiers={this.props.listing.item.modifiers} updateInput={this.props.updateInput} mod={this.props.mod} />
+                            </div>
+                            {this.props.listing.item.properties ? <div className='col'>
+                                <ItemProps id={this.props.listing.id} properties={this.props.listing.item.properties} category={this.props.listing.item.category} updateInput={this.props.updateInput} prop={this.props.prop} />
+                            </div> : null}
+                        </div>
+                        <div className='row'>
+                            <div className='col-xs-auto'>
+                                <p style={{ marginTop: '1rem' }}><span className='hover' onClick={() => this.setSort('price')}>{this.props.listing.item.note}</span> | IGN: {this.props.listing.char} | <a href={`https://www.pathofexile.com/account/view-profile/${this.props.listing.acct}`} style={{ color: '#ff4444' }}>Profile</a>{this.state.whisper != null ? (<span> | <CopyToClipboard text={this.state.whisper} onCopy={() => this.setState({ copied: true })}>{this.state.copied == false ? <span style={{ color: '#ff4444' }}>Whisper</span> : <span style={{ color: '#ff4444' }}>Copied to Clipboard</span>}</CopyToClipboard></span>) : null}</p>
                             </div>
                         </div>
                     </div>

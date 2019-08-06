@@ -31,7 +31,8 @@ class App extends Component {
             league: '',
             data: {},
             sortStyle: 'age',
-            mod: { text: '', pattern: /^$/, numVals: 0, type: '' }
+            mod: { text: '', pattern: /^$/, numVals: 0, type: '' },
+            prop: ''
         }
 
         this.updateInput = this.updateInput.bind(this);
@@ -136,6 +137,7 @@ class App extends Component {
                         updateInput={this.updateInput}
                         sortStyle={this.state.sortStyle}
                         mod={this.state.mod}
+                        prop={this.state.prop}
                     />
                 </div>
             </React.Fragment>
