@@ -4,6 +4,8 @@ const getCurrencyData = require('../functions/getCurrencyData');
 const calculateRawValue = require('../functions/calculateRawValue');
 const SearchHandler = require('./SearchHandler');
 const extractPropertyValue = require('../functions/extractPropertyValue');
+const calculateBaseQuality = require('../functions/calculateBaseQuality');
+const calculatePhysDamageAt20Quality = require('../functions/calculatePhysDamageAt20Quality');
 const VALID_PROPERTIES = require('../configs/propertyConfigBackend');
 
 //This class will handle all of the item and currency data for the server
@@ -170,7 +172,7 @@ class DataHandler {
                     ilvl: element.ilvl,
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
                     shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : false,
-                    properties: element.properties ? this.handleItemProperties(element.properties) : undefined,
+                    properties: element.properties ? this.handleItemProperties(element) : undefined,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y], //Position in the stash tab
                     note: price, //The price listing
@@ -211,7 +213,7 @@ class DataHandler {
                         ilvl: element.ilvl,
                         corrupted: element.corrupted != undefined ? element.corrupted : false,
                         shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : false,
-                        properties: element.properties ? this.handleItemProperties(element.properties) : undefined,
+                        properties: element.properties ? this.handleItemProperties(element) : undefined,
                         modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                         position: [element.x, element.y],
                         note: price,
@@ -261,53 +263,80 @@ class DataHandler {
         }
     }
 
-    handleItemProperties(properties) {
+    handleItemProperties(item) {
+        const properties = item.properties;
         let parsedPropertiesToSave = [];
-
-        let damageProps = {};
+        let notablePropValues = {
+            damage: {},
+            defense: {},
+            quality: undefined
+        }
 
         properties.map((property) => {
             if (VALID_PROPERTIES[property.name]) {
                 parsedPropertiesToSave.push({ name: property.name, value: extractPropertyValue(property, VALID_PROPERTIES[property.name]) });
-                if (property.name === 'Physical Damage')
-                    damageProps.phys = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
-                else if (property.name === 'Elemental Damage')
-                    damageProps.ele = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
-                else if (property.name === 'Chaos Damage')
-                    damageProps.chaos = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
-                else if (property.name === 'Attacks per Second')
-                    damageProps.speed = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                switch (property.name) {
+                    case 'Physical Damage':
+                        notablePropValues.damage.phys = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        break;
+                    case 'Elemental Damage':
+                        notablePropValues.damage.ele = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        break;
+                    case 'Chaos Damage':
+                        notablePropValues.damage.chaos = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        break;
+                    case 'Attacks per Second':
+                        notablePropValues.damage.speed = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        break;
+                    case 'Armour':
+                        notablePropValues.defense.armour = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        break;
+                    case 'Energy Shield':
+                        notablePropValues.defense.shield = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        break;
+                    case 'Evasion Rating':
+                        notablePropValues.defense.evasion = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        break;
+                    case 'Quality':
+                        notablePropValues.quality = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        break;
+                }
             }
 
             return null;
         });
 
+        if (!notablePropValues.quality && (item.category.gems || item.category.armour || item.category.weapons || (item.category.maps && item.category.maps.length === 0))) {
+            notablePropValues.quality = !(item.category.gems || item.category.maps) ? 0 : false;
+            parsedPropertiesToSave.push({ name: 'Quality', value: 0 })
+        }
+        else if (!(item.category.armour || item.category.weapons)) {
+            notablePropValues.quality = false;
+        }
+
+        //If the item has quality that modifies stats and it can be modified
+        if (notablePropValues.quality && !item.corrupted && !(item.explicitMods && /Mirrored/.test(JSON.stringify(item.explicitMods)))) {
+            let baseQuality = calculateBaseQuality(item, notablePropValues.quality);
+            if (baseQuality < 20) {
+                if (notablePropValues.damage.phys)
+                    notablePropValues.damage.physAt20 = calculatePhysDamageAt20Quality(item, 20 - baseQuality);
+            }
+        }
+
+        //TODO: add 'at 20 quality' values to parsedProperty objects where necessary
         let val = 0;
-
-        if (damageProps.phys && damageProps.speed) {
-
-            val = Math.round(damageProps.phys * damageProps.speed * 100) / 100;
-
+        if (notablePropValues.damage.phys && notablePropValues.damage.speed) {
+            val = Math.round(notablePropValues.damage.phys * notablePropValues.damage.speed * 100) / 100;
             parsedPropertiesToSave.push({ name: 'Physical Damage per Second', value: val });
         }
 
-        if (damageProps.ele && damageProps.speed) {
-
-            val = Math.round(damageProps.ele * damageProps.speed * 100) / 100;
-
+        if (notablePropValues.damage.ele && notablePropValues.damage.speed) {
+            val = Math.round(notablePropValues.damage.ele * notablePropValues.damage.speed * 100) / 100;
             parsedPropertiesToSave.push({ name: 'Elemental Damage per Second', value: val });
         }
 
-        if ((damageProps.phys || damageProps.ele || damageProps.chaos) && damageProps.speed) {
-
-            val = Math.round(
-                (
-                    (damageProps.phys ? damageProps.phys : 0)
-                    + (damageProps.ele ? damageProps.ele : 0)
-                    + (damageProps.chaos ? damageProps.chaos : 0)
-                )
-                * damageProps.speed * 100) / 100;
-
+        if ((notablePropValues.damage.phys || notablePropValues.damage.ele || notablePropValues.damage.chaos) && notablePropValues.damage.speed) {
+            val = Math.round(((notablePropValues.damage.phys || 0) + (notablePropValues.damage.ele || 0) + (notablePropValues.damage.chaos || 0)) * notablePropValues.damage.speed * 100) / 100;
             parsedPropertiesToSave.push({ name: 'Damage per Second', value: val });
         }
 
