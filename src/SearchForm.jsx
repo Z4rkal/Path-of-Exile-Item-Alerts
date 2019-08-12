@@ -31,13 +31,13 @@ class SearchForm extends Component {
                 <div className='card-body'>
                     <label htmlFor='search-bar' className='control-label'>Enter the name of the item you would like to watch for:</label>
                     <input id='search-bar' className='form-control' type='text' value={this.state.name} onChange={(e) => this.updateInput('name', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
-                    <div id='advanced-form' className={this.props.advanced ? 'show' : ''} style={{marginTop: '0.25rem'}}>
+                    <div id='advanced-form' className={this.props.advanced ? 'show' : ''} style={{ marginTop: '0.25rem' }}>
                         <label htmlFor='type-bar' className='control-label'>Enter the type of item you would like to watch for:</label>
                         <input id='type-bar' className='form-control' type='text' value={this.state.type} onChange={(e) => this.updateInput('type', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
                         <label htmlFor='base-bar' className='control-label'>Enter the item base you would like to watch for:</label>
                         <input id='base-bar' className='form-control' type='text' value={this.state.base} onChange={(e) => this.updateInput('base', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
                         <div className='form-row'>
-                            <div className='form-group col-xs-2'>
+                            <div className='form-group col-auto'>
                                 <label htmlFor='sockets-bar' className='control-label'>Sockets:</label>
                                 <ul id='sockets-bar' className='list-group list-group-horizontal'>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
@@ -48,7 +48,7 @@ class SearchForm extends Component {
                                     </li>
                                 </ul>
                             </div>
-                            <div className='form-group col-xs-2'>
+                            <div className='form-group col-auto'>
                                 <label htmlFor='links-bar' className='control-label'>Links:</label>
                                 <ul id='links-bar' className='list-group list-group-horizontal'>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
@@ -59,7 +59,7 @@ class SearchForm extends Component {
                                     </li>
                                 </ul>
                             </div>
-                            <div className='form-group col-xs-2'>
+                            <div className='form-group col-auto'>
                                 <label htmlFor='ilvl-bar' className='control-label'>iLvl:</label>
                                 <ul id='ilvl-bar' className='list-group list-group-horizontal'>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
@@ -70,7 +70,7 @@ class SearchForm extends Component {
                                     </li>
                                 </ul>
                             </div>
-                            <div className='form-group col-xs-2'>
+                            <div className='form-group col-auto'>
                                 <label htmlFor='tier-bar' className='control-label'>Tier:</label>
                                 <ul id='tier-bar' className='list-group list-group-horizontal'>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
@@ -81,7 +81,7 @@ class SearchForm extends Component {
                                     </li>
                                 </ul>
                             </div>
-                            <div className='form-group col-xs-2'>
+                            <div className='form-group col-auto'>
                                 <label htmlFor='qual-bar' className='control-label'>Quality:</label>
                                 <ul id='qual-bar' className='list-group list-group-horizontal'>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
@@ -92,7 +92,8 @@ class SearchForm extends Component {
                                     </li>
                                 </ul>
                             </div>
-                            <div className='form-group col-xs-1'>
+                            <div className='w-100 d-block d-lg-none'></div>
+                            <div className='form-group col-auto'>
                                 <label htmlFor='corrupted-select' className='control-label'>Corrupted:</label>
                                 <select id='corrupted-select' className='form-control search-select px-1' value={this.state.corrupted} onChange={(e) => this.updateInput('corrupted', e.target.value)}>
                                     <option value={true}>True</option>
@@ -100,7 +101,7 @@ class SearchForm extends Component {
                                     <option value={'N/A'}>N/A</option>
                                 </select>
                             </div>
-                            <div className='form-group col-xs-1'>
+                            <div className='form-group col-auto'>
                                 <label htmlFor='shaper-elder-select' className='control-label'>Shaper/Elder:</label>
                                 <select id='shaper-elder-select' className='form-control search-select px-1' value={this.state.shaperElder} onChange={(e) => this.updateInput('shaperElder', e.target.value)}>
                                     <option value={'shaper'}>Shaper</option>
@@ -110,7 +111,7 @@ class SearchForm extends Component {
                                     <option value={'N/A'}>N/A</option>
                                 </select>
                             </div>
-                            <div className='form-group col-xs-1'>
+                            <div className='form-group col-auto'>
                                 <label htmlFor='rarity-select' className='control-label'>Rarity:</label>
                                 <select id='rarity-select' className='form-control search-select px-1' value={this.state.rarity} onChange={(e) => this.updateInput('rarity', e.target.value)}>
                                     <option value={'normal'}>Normal</option>

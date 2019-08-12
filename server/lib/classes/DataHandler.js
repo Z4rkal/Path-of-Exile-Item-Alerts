@@ -172,9 +172,11 @@ class DataHandler {
                     ilvl: element.ilvl,
                     corrupted: element.corrupted != undefined ? element.corrupted : false,
                     shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : false,
+                    sockets: element.sockets ? element.sockets : undefined,
                     properties: element.properties ? this.handleItemProperties(element) : undefined,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
-                    position: [element.x, element.y], //Position in the stash tab
+                    position: [element.x, element.y],
+                    category: element.category, //Position in the stash tab
                     note: price, //The price listing
                     time, //The time that the item was parsed
                     chaos: price != 'Price: N/A' ? calculateRawValue(price, this.cData) : 'N/A' //Use calculateRawValue to determine the value in 'chaos orbs' of the listing
@@ -185,10 +187,10 @@ class DataHandler {
         })
 
         //If we had any matches, then add the new tab to this.stashTabs
-        if (Object.entries(newTab.matches).length != 0 && Object.entries(this.stashTabs).length < 50)
+        if (Object.entries(newTab.matches).length != 0 && Object.entries(this.stashTabs).length < 150)
             this.stashTabs[tab.id] = newTab;
-        //Use an arbitrary limit of 50 stash tabs so that we don't eat through our allowed memory on Heroku or Now, way way lower than it could be
-        else if (Object.entries(this.stashTabs).length == 50) {
+        //Use an arbitrary limit of 150 stash tabs
+        else if (Object.entries(this.stashTabs).length >= 150) {
             delete this.stashTabs[Object.entries(this.stashTabs)[0][1].id]; // = undefined;
             this.stashTabs[tab.id] = newTab;
         }
@@ -213,9 +215,11 @@ class DataHandler {
                         ilvl: element.ilvl,
                         corrupted: element.corrupted != undefined ? element.corrupted : false,
                         shaperElder: element.shaper != undefined ? 'shaper' : element.elder != undefined ? 'elder' : false,
+                        sockets: element.sockets ? element.sockets : undefined,
                         properties: element.properties ? this.handleItemProperties(element) : undefined,
                         modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                         position: [element.x, element.y],
+                        category: element.category,
                         note: price,
                         time,
                         chaos: price != 'Price: N/A' ? calculateRawValue(price, this.cData) : 'N/A'

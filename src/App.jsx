@@ -85,9 +85,9 @@ class App extends Component {
     handleNewData(dataIn) {
         let data = this.state.data;
 
-        //Added upper bound of 50, just so now doesn't explode after a short while
+        //Capped at 150 for the moment
         dataIn.added.forEach((element) => {
-            if (Object.entries(data).length == 50)
+            if (Object.entries(data).length == 150)
                 delete data[Object.entries(data)[0][1].id];// = undefined;
             data[element.id] = element;
         });

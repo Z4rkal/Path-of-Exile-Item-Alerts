@@ -43,13 +43,80 @@ class Item extends Component {
         }
     }
 
+    renderSockets(sockets, type) {
+        if (!sockets) return null;
+
+        let prevGroup = -1;
+        const socketsInfo = sockets.map((socket, index) => {
+            let socketAttr;
+            switch (socket.attr) {
+                case 'G':
+                    socketAttr = 'gen';
+                    break;
+                case 'I':
+                    socketAttr = 'int';
+                    break;
+                case 'D':
+                    socketAttr = 'dex';
+                    break;
+                case 'S':
+                    socketAttr = 'str';
+                    break;
+                case 'A':
+                    socketAttr = 'aby';
+                    break;
+                default: throw new Error(`Invalid socket attribute: ${socket.attr}`);
+            }
+
+
+            let orient;
+            if (!type || type !== 'One Handed') {
+                if (index % 2 === 0)
+                    orient = 'v_link';
+                else orient = 'h_link';
+            }
+            else
+                orient = 'v_link';
+
+            const socketInfo = {
+                link: socket.group === prevGroup ? `/sockets/${orient}.png` : false,
+                src: `/sockets/${socketAttr}.png`
+            };
+
+            prevGroup = socket.group;
+
+            return socketInfo;
+
+        })
+
+        return (
+            <div className='position-absolute sockets'>
+                {socketsInfo.map((socket, index) => (
+                    <React.Fragment key={this.props.listing.item.id + ' socket: ' + index}>
+                        {socket.link ? <img className={`position-absolute ${type === 'One Handed' ? `v-` : ``}link-${index}`} src={socket.link} /> : null}
+                        <img className={`position-absolute ${type === 'One Handed' ? `v-` : ``}socket-${index}`} src={socket.src} />
+                    </React.Fragment>
+                ))}
+            </div>
+        );
+    }
+
     render() {
         if (this.props.listing.id == undefined || this.props.listing.item.id == undefined) return (0)
+
+        const ONE_PATTERN = /^one|^dagger|^wand/i;
+
+        let oneHanded = false;
+        if (this.props.listing.item.type === 'Gnarled Branch' || (this.props.listing.item.category && this.props.listing.item.category.weapons && ONE_PATTERN.test(this.props.listing.item.category.weapons)))
+            oneHanded = true;
 
         return (
             <li className='list-group-item' key={this.props.listing.item.id}>
                 <div className='row h-100'>
-                    <img className='col-sm-auto d-none d-sm-flex img-fluid mx-auto my-auto' src={this.props.listing.item.icon} />
+                    <div className='col-sm-auto d-none d-sm-flex mx-auto my-auto icon-sockets-div'>
+                        <img className='img-fluid' src={this.props.listing.item.icon} />
+                        {oneHanded ? this.renderSockets(this.props.listing.item.sockets, 'One Handed') : this.renderSockets(this.props.listing.item.sockets)}
+                    </div>
                     <div className='col'>
                         <div className='row justify-content-between'>
                             <p className='col-xs-auto'>
