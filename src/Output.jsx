@@ -99,11 +99,11 @@ class Output extends Component {
         try {
             if (a.item.properties)
                 for (let i = 0; i < a.item.properties.length; i++) {
-                    if (a.item.properties[i].name === prop) { prop1 = a.item.properties[i].value; break; }
+                    if (a.item.properties[i].name === prop) { prop1 = a.item.properties[i].valueAt20 ? a.item.properties[i].valueAt20 : a.item.properties[i].value; break; }
                 }
             if (b.item.properties)
                 for (let i = 0; i < b.item.properties.length; i++) {
-                    if (b.item.properties[i].name === prop) { prop2 = b.item.properties[i].value; break; }
+                    if (b.item.properties[i].name === prop) { prop2 = b.item.properties[i].valueAt20 ? b.item.properties[i].valueAt20 : b.item.properties[i].value; break; }
                 }
         }
         catch (err) {

@@ -277,6 +277,7 @@ class DataHandler {
                 parsedPropertiesToSave.push({ name: property.name, value: extractPropertyValue(property, VALID_PROPERTIES[property.name]) });
                 switch (property.name) {
                     case 'Physical Damage':
+                        notablePropValues.damage.rawPhys = property.values[0][0];
                         notablePropValues.damage.phys = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
                         break;
                     case 'Elemental Damage':
@@ -289,13 +290,13 @@ class DataHandler {
                         notablePropValues.damage.speed = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
                         break;
                     case 'Armour':
-                        notablePropValues.defense.armour = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        notablePropValues.defense.armour = { value: parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value, index: parsedPropertiesToSave.length - 1 };
                         break;
                     case 'Energy Shield':
-                        notablePropValues.defense.shield = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        notablePropValues.defense.shield = { value: parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value, index: parsedPropertiesToSave.length - 1 };
                         break;
                     case 'Evasion Rating':
-                        notablePropValues.defense.evasion = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
+                        notablePropValues.defense.evasion = { value: parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value, index: parsedPropertiesToSave.length - 1 };
                         break;
                     case 'Quality':
                         notablePropValues.quality = parsedPropertiesToSave[parsedPropertiesToSave.length - 1].value;
@@ -315,19 +316,27 @@ class DataHandler {
         }
 
         //If the item has quality that modifies stats and it can be modified
-        if (notablePropValues.quality && !item.corrupted && !(item.explicitMods && /Mirrored/.test(JSON.stringify(item.explicitMods)))) {
+        if ((notablePropValues.quality || notablePropValues.quality === 0) && !item.corrupted && !(item.explicitMods && /Mirrored/.test(JSON.stringify(item.explicitMods)))) {
             let baseQuality = calculateBaseQuality(item, notablePropValues.quality);
             if (baseQuality < 20) {
                 if (notablePropValues.damage.phys)
-                    notablePropValues.damage.physAt20 = calculatePhysDamageAt20Quality(item, 20 - baseQuality);
+                    notablePropValues.damage.physAt20 = calculatePhysDamageAt20Quality(item, 20 - baseQuality, notablePropValues.damage.quality, notablePropValues.damage.rawPhys);
+                //TODO: Defenses
             }
         }
 
         //TODO: add 'at 20 quality' values to parsedProperty objects where necessary
         let val = 0;
+        let val20 = 0;
         if (notablePropValues.damage.phys && notablePropValues.damage.speed) {
             val = Math.round(notablePropValues.damage.phys * notablePropValues.damage.speed * 100) / 100;
-            parsedPropertiesToSave.push({ name: 'Physical Damage per Second', value: val });
+            if (notablePropValues.damage.physAt20) {
+                val20 = Math.round(notablePropValues.damage.physAt20 * notablePropValues.damage.speed * 100) / 100;
+                parsedPropertiesToSave.push({ name: 'Physical Damage per Second', value: val, valueAt20: val20 });
+            }
+            else {
+                parsedPropertiesToSave.push({ name: 'Physical Damage per Second', value: val });
+            }
         }
 
         if (notablePropValues.damage.ele && notablePropValues.damage.speed) {
@@ -337,7 +346,13 @@ class DataHandler {
 
         if ((notablePropValues.damage.phys || notablePropValues.damage.ele || notablePropValues.damage.chaos) && notablePropValues.damage.speed) {
             val = Math.round(((notablePropValues.damage.phys || 0) + (notablePropValues.damage.ele || 0) + (notablePropValues.damage.chaos || 0)) * notablePropValues.damage.speed * 100) / 100;
-            parsedPropertiesToSave.push({ name: 'Damage per Second', value: val });
+            if (notablePropValues.damage.physAt20) {
+                val20 = Math.round((notablePropValues.damage.physAt20 + (notablePropValues.damage.ele || 0) + (notablePropValues.damage.chaos || 0)) * notablePropValues.damage.speed * 100) / 100;
+                parsedPropertiesToSave.push({ name: 'Damage per Second', value: val, valueAt20: val20 });
+            }
+            else {
+                parsedPropertiesToSave.push({ name: 'Damage per Second', value: val });
+            }
         }
 
         return parsedPropertiesToSave;

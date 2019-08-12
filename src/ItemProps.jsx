@@ -17,7 +17,7 @@ class ItemProps extends Component {
         return (
             <div className='col-xs-auto hover' key={property.name + ' ' + this.props.id} onClick={() => this.setSortProp(property.name)} style={this.matchSortedProp(property.name)}>
                 <span className='property-label'>{PROPERTY_PRIORITIES_ABBREVIATIONS_AND_ROWS[property.name][1] || property.name}: </span>
-                <span className='property-value'>{property.value}{property.name === 'Quality' ? `%` : ``}</span>
+                <span className='property-value'>{property.valueAt20 ? `${property.value} (${property.valueAt20})` : property.value}{property.name === 'Quality' ? `%` : ``}</span>
             </div>
         )
     }
