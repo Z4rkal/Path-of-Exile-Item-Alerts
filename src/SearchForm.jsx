@@ -62,7 +62,7 @@ class SearchForm extends Component {
                 modSearch[groupIndex].max = '';
                 break;
             case 'add':
-                modSearch[groupIndex].modifiers.push(value);
+                modSearch[groupIndex].modifiers.push({ text: '', min: '', max: '' });
                 break;
             case 'remove':
                 modSearch[groupIndex].modifiers.splice(modIndex, 1);
@@ -78,15 +78,15 @@ class SearchForm extends Component {
                     value = value.replace(/(?:[\+\-])(\ |[^\W\d]|$)/g, (match, p1) => { modified = true; return p1 });
 
                 const denumPat = /(?:([0-9#]+)(?=\ |$))|(?:([0-9]+|#{1,})(?=[^\W\d]))/g;
-                const filterPat = /[^\w\ \+\-#%]+/g;
+                const filterPat = /[^\w\ \+\-#%]+|\_+/g;
                 const hashPat = /([\+\-])(?=\ |$)|(?:\ |^)(%)/g;
-                const sanPat = /(?:[^\w\ ]|\d)*([^\W\d]+|(?:\+|\-)?#%?)(?:[^\w\ ]|\d)*/g;
+                const sanPat = /(?:[^\w\ \+\-]|\d|[\+\-])*?((?:\+(?:#%|#)|\-(?:#%|#)|(?:#%|#)))(?:[^\w\ ]|\d)*(?=\ |$)|(?:[^\w\ ]|\d)*([^\W\d]+)(?:[^\w\ ]|\d)*/g;
                 const firstCharPat = /(?:\ |^)[^\W\d]/g;
 
                 const denumberedText = value.replace(denumPat, (match, p1) => { modified = true; return p1 ? `#` : `` });
                 const filteredText = denumberedText.replace(filterPat, () => { modified = true; return `` });
                 const hashAutofill = filteredText.replace(hashPat, (match, p1, p2) => { modified = true; return `${p1 || ` `}#${p2 || ``}` });
-                const sanitizedText = hashAutofill.replace(sanPat, (match, p1) => { modified = true; return `${p1}` });
+                const sanitizedText = hashAutofill.replace(sanPat, (match, p1, p2) => { modified = true; return `${p1 || ``}${p2 || ``}` });
                 const formattedText = sanitizedText.toLowerCase().replace(firstCharPat, (match) => { modified = true; return match.toUpperCase() });
 
                 if (modified) {
