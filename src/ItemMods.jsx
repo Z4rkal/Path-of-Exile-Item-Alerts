@@ -11,7 +11,7 @@ class ItemMods extends Component {
             .replace(/[0-9]+(?:.[0-9]+)?/g, '[0-9]+(?:.[0-9]+)?');
         //After doing this we're left with a regex-esque string like `Minions deal [0-9]+(?:.[0-9]+)?\% increased damage`
         //that we can use to match the modifier, so we'll build a regex out of it 
-        const pattern = new RegExp(patStr);
+        const pattern = new RegExp(`^${patStr}$`);
 
         //Finally, make a new mod string with all the numbers replaced with `#` 
         //just in case we need something to spit out in an error relating to sorting by modifier to describe what the mod looks like.

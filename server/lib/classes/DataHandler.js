@@ -6,6 +6,8 @@ const SearchHandler = require('./SearchHandler');
 const extractPropertyValue = require('../functions/extractPropertyValue');
 const calculateBaseQuality = require('../functions/calculateBaseQuality');
 const calculatePhysDamageAt20Quality = require('../functions/calculatePhysDamageAt20Quality');
+const compareToMinMax = require('../functions/compareToMinMax');
+const extractModValue = require('../functions/extractModValue');
 const VALID_PROPERTIES = require('../configs/propertyConfigBackend');
 
 //This class will handle all of the item and currency data for the server
@@ -162,7 +164,7 @@ class DataHandler {
         //Set up the new tab object by pulling info from the data, matches is where any items that match our search will go
         let newTab = { id: tab.id, owner: tab.accountName, lastChar: tab.lastCharacterName, stashName: tab.stash, matches: {} }
         tab.items.forEach((element) => { //Go through the tab item by item
-            if (this.watchFor(element)) { //If an item matches our search (currently just item name)
+            if (this.watchFor(element, compareToMinMax, extractModValue)) { //If an item matches our search (currently just item name)
                 const price = element.note != undefined ? formatPrice(element.note) : 'Price: N/A';
                 newTab.matches[element.id] = { //Then make a new item object and put it in newTab.matches
                     id: element.id,
@@ -204,7 +206,7 @@ class DataHandler {
         const time = new Date().getTime(); //Get the time that the current tab is being parsed.
 
         tab.items.forEach((element) => { //Go through the tab item by item
-            if (this.watchFor(element)) { //If an item matches our search (currently just item name), then parse it
+            if (this.watchFor(element, compareToMinMax, extractModValue)) { //If an item matches our search (currently just item name), then parse it
                 if (oldItems[element.id] == undefined) { //If we didn't already know about the item, then handle it like a new item
                     const price = element.note != undefined ? formatPrice(element.note) : 'Price: N/A';
                     curTab.matches[element.id] = { //First make a new item object and put it in curTab.matches

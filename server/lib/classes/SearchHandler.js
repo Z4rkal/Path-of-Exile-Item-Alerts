@@ -13,7 +13,8 @@ const VALID_PARAMS = {
     rarity: 'word_str',
     iLvl: 'two_num_array',
     tier: 'two_num_array',
-    quality: 'two_num_array'
+    quality: 'two_num_array',
+    modGroups: 'group_array'
 }
 
 class SearchHandler {
@@ -27,30 +28,45 @@ class SearchHandler {
 
     set newParams(searchParams) {
         try {
-            const validationErr = new Error('The searchParams object contained some invalid keys or values, aborting building a search function for safety');
+            const validationErr = (type) => new Error(`The searchParams object contained some invalid keys or values${type ? ` of type ${type}` : ``}, aborting building a search function for safety`);
 
             //First sanitize the input by getting rid of null values
             Object.entries(searchParams).forEach(([param, el]) => {
-                if (
-                    el === null
-                    || el === ''
-                    || (typeof (el) === 'object'
-                        && (el[0] === null || el[0] === '')
-                        && (el[1] === null || el[1] === ''))
-                ) delete searchParams[param];
+                if (param !== 'modGroups') {
+                    if (
+                        el === null
+                        || el === ''
+                        || (typeof (el) === 'object'
+                            && (el[0] === null || el[0] === '')
+                            && (el[1] === null || el[1] === ''))
+                    ) delete searchParams[param];
 
-                else if (typeof (el) === 'object') {
-                    if (el[0] === '') searchParams[param][0] = null;
-                    if (el[1] === '') searchParams[param][1] = null;
+                    else if (typeof (el) === 'object') {
+                        if (el[0] === '') searchParams[param][0] = null;
+                        if (el[1] === '') searchParams[param][1] = null;
+                    }
                 }
             });
 
+            //Remove empty mod groups
+            const tempGroups = searchParams.modGroups;
+            tempGroups.map((group, index) => {
+                group.modifiers.map((modifier, modIndex) => {
+                    if (modifier.text === null || modifier.text === '' || typeof modifier.text !== 'string')
+                        searchParams.modGroups[index].modifiers.splice(modIndex, 1)
+                });
+                if (group.modifiers.length === 0 || searchParams.modGroups[index].modifiers.length === 0)
+                    searchParams.modGroups.splice(index, 1);
+            });
+            if (searchParams.modGroups.length === 0)
+                delete searchParams.modGroups;
+
             //Then validate the remaining input for safety
             Object.entries(searchParams).forEach(([param, el]) => {
-                if (!VALID_PARAMS[param]) throw validationErr;
+                if (!VALID_PARAMS[param]) throw validationErr(param);
                 switch (VALID_PARAMS[param]) {
                     case 'regex_str':
-                        if (typeof (el) !== 'string' || !/^[a-z ']+$/i.test(el)) throw validationErr;
+                        if (typeof (el) !== 'string' || !/^[a-z ']+$/i.test(el)) throw validationErr('regex_str');
                         break;
                     case 'two_num_array':
                         if (
@@ -58,22 +74,45 @@ class SearchHandler {
                             || Object.entries(el).length !== 2
                             || !(/^[0-9]+$/.test(el[0]) || el[0] === null)
                             || !(/^[0-9]+$/.test(el[1]) || el[1] === null)
-                        ) throw validationErr;
+                        ) throw validationErr('two_num_array');
                         break;
                     case 'bool_str':
-                        if (typeof (el) !== 'string' || !/^true$|^false$/.test(el)) throw validationErr;
+                        if (typeof (el) !== 'string' || !/^true$|^false$/.test(el)) throw validationErr('bool_str');
                         break;
                     case 'word_str':
-                        if (typeof (el) !== 'string' || !/^[a-z]+(?:\-[a-z]+)*$/i.test(el)) throw validationErr;
+                        if (typeof (el) !== 'string' || !/^[a-z]+(?:\-[a-z]+)*$/i.test(el)) throw validationErr('word_str');
+                        break;
+                    case 'group_array':
+                        if (typeof el !== 'object' || el.length === 0) throw validationErr('group_array');
+                        el.map((group) => {
+                            if (!group.modifiers || typeof group.modifiers !== 'object' || group.modifiers.length === 0) throw validationErr('group_array: group modifiers');
+                            if (!group.type || typeof group.type !== 'string' || !/^and$|^sum$|^count$|^not$/.test(group.type)) throw validationErr('group_array: group type');
+                            if (typeof group.min !== 'string' || !/^[0-9]*$/.test(group.min)) throw validationErr('group_array: group min');
+                            if (typeof group.max !== 'string' || !/^[0-9]*$/.test(group.max)) throw validationErr('group_array: group max');
+                            group.modifiers.map((modifier) => {
+                                if (!modifier.text
+                                    || typeof modifier.text !== 'string'
+                                    || modifier.text.length === 0
+                                    || /\/|\\/.test(modifier.text)
+                                    || !/^(?:(?:(?:[\+\-]?#%?)|(?:[^\W\d_]+))(?: |$))+$/.test(modifier.text))
+                                    throw validationErr('group_array: modifier text');
+                                if (typeof modifier.min !== 'string'
+                                    || !/^[0-9]*$/.test(modifier.min))
+                                    throw validationErr('group_array: modifier min');
+                                if (typeof modifier.max !== 'string'
+                                    || !/^[0-9]*$/.test(modifier.max))
+                                    throw validationErr('group_array: modifier max');
+                            });
+                        });
                         break;
                     default:
-                        throw validationErr;
+                        throw validationErr();
                 }
             });
 
             const funcStr = this.buildSearchFunc(searchParams);
             //Then build the function by constructing a new function from the string literal returned by this.buildSearchFunc
-            this.searchFunction = new Function(['item'], funcStr);
+            this.searchFunction = new Function(['item', 'compareToMinMax', 'extractModValue'], funcStr);
 
             //console.log('::::Completed Function::::');
             //console.log(this.searchFunction.toString());
@@ -212,6 +251,64 @@ class SearchHandler {
                     }
                     else throw new Error('vewy wong ;w;');
                     break;
+                case 'modGroups':
+                    a += `\n\tconst itemMods = [].concat(item.implicitMods || '',item.explicitMods || '',item.craftedMods || '');`
+                    //a += `\n\tconsole.log(itemMods);`
+                    a += `\n\tlet matches = [];`
+                    a += `\n\tlet sum = 0;`
+                    a += `\n\tlet count = 0;`
+                    el.map((group) => {
+                        switch (group.type) {
+                            case 'and':
+                                group.modifiers.map((modifier) => {
+                                    const modPattern = this.regexifyMod(modifier.text);
+                                    a += this.matchMods(modPattern, modifier.min, modifier.max, false);
+                                    a += `\n\tif(matches.length === 0) return false;`;
+                                });
+                                break;
+                            case 'sum':
+                                a += `\n\tsum = 0;`;
+                                group.modifiers.map((modifier) => {
+                                    const modPattern = this.regexifyMod(modifier.text);
+                                    a += this.matchMods(modPattern, modifier.min, modifier.max, true);
+                                    a += `\n\tsum += matches.reduce((acc,cur) => acc + cur, 0)`;
+                                });
+                                if (group.min && group.max)
+                                    a += `\n\tif(sum < ${group.min} || sum > ${group.max}) return false;`;
+                                else if (group.min)
+                                    a += `\n\tif(sum < ${group.min}) return false;`;
+                                else if (group.max)
+                                    a += `\n\tif(sum > ${group.max}) return false;`;
+                                else
+                                    a += `\n\tif(sum === 0) return false;`;
+                                break;
+                            case 'count':
+                                a += `\n\tcount = 0;`;
+                                group.modifiers.map((modifier) => {
+                                    const modPattern = this.regexifyMod(modifier.text);
+                                    a += this.matchMods(modPattern, modifier.min, modifier.max, false);
+                                    a += `\n\tif(matches.length != 0) count++;`;
+                                });
+                                if (group.min && group.max)
+                                    a += `\n\tif(count < ${group.min} || count > ${group.max}) return false;`;
+                                else if (group.min)
+                                    a += `\n\tif(count < ${group.min}) return false;`;
+                                else if (group.max)
+                                    a += `\n\tif(count > ${group.max}) return false;`;
+                                else
+                                    a += `\n\tif(count === 0) return false;`;
+                                break;
+                            case 'not':
+                                group.modifiers.map((modifier) => {
+                                    const modPattern = this.regexifyMod(modifier.text);
+                                    a += this.matchMods(modPattern, modifier.min, modifier.max, false);
+                                    a += `\n\tif(matches.length !== 0) return false;`;
+                                });
+                                break;
+                            default: throw new Error(`an invalid group type got through validation ;w;`)
+                        }
+                    });
+                    break;
                 default:
                     throw new Error(`Error: Invalid search parameter; ${param} is either a bad input or not implemented yet!`)
             }
@@ -225,6 +322,20 @@ class SearchHandler {
         functionString += '\nreturn true;';
 
         return functionString;
+    }
+
+    regexifyMod(modifierText) {
+        return modifierText
+            .replace(/\ {2,}/g, ' ')
+            .replace(/[\+\-]/g, '\\$&')
+            .replace(/#/g, '[0-9]+');
+    }
+
+    matchMods(modPattern, min, max, shouldExtract) {
+        return `\n\tmatches = itemMods`
+            + `.filter((modifier) => /^${modPattern}$/i.test(modifier))`
+            + (shouldExtract || min || max ? `.map((modifier) => extractModValue(modifier))` : ``)
+            + (min || max ? `.filter((value) => compareToMinMax(value,${min || null},${max || null}))` : ``);
     }
 }
 

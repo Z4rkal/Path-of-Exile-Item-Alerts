@@ -254,13 +254,13 @@ class SearchForm extends Component {
                         </div>
                         {modSearch.map((group, index) => (
                             <React.Fragment key={`Mod Group: ${index}`}>
-                                <div className='form-group row mb-3'>
+                                <div className='form-group row mb-3' alt={`Modifier group ${index} container`}>
                                     {group.modifiers.map((modifier, modIndex) => (
                                         <div className='form-group col-12 mb-1' key={`Mod Group: ${index}, Mod: ${modIndex}`}>
                                             <div className='input-group mb-1'>
-                                                <input className='form-control mod-text' type='text' value={modSearch[index].modifiers[modIndex].text} onChange={(e) => this.updateModGroup('mod-text', e, index, modIndex)}></input>
-                                                <input className='form-control mod-value' type='text' placeholder='Min' value={modSearch[index].modifiers[modIndex].min} onChange={(e) => this.updateModGroup('mod-min', e, index, modIndex)}></input>
-                                                <input className='form-control mod-value' type='text' placeholder='Max' value={modSearch[index].modifiers[modIndex].max} onChange={(e) => this.updateModGroup('mod-max', e, index, modIndex)}></input>
+                                                <input className='form-control mod-text' type='text' value={modSearch[index].modifiers[modIndex].text} onChange={(e) => this.updateModGroup('mod-text', e, index, modIndex)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                                <input className='form-control mod-value' type='text' placeholder='Min' value={modSearch[index].modifiers[modIndex].min} onChange={(e) => this.updateModGroup('mod-min', e, index, modIndex)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                                <input className='form-control mod-value' type='text' placeholder='Max' value={modSearch[index].modifiers[modIndex].max} onChange={(e) => this.updateModGroup('mod-max', e, index, modIndex)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
                                                 <div className='input-group-append'>
                                                     <button className='btn btn-outline-danger' onClick={() => this.updateModGroup('remove', null, index, modIndex)}>{`-`/*&#U+1F5D1*/}</button>
                                                 </div>
@@ -284,14 +284,14 @@ class SearchForm extends Component {
                                                     <option value={'count'}>Count</option>
                                                     <option value={'not'}>Not</option>
                                                 </select>
-                                                <input className='form-control count-sum' placeholder='Min' value={modSearch[index].min} onChange={(e) => this.updateModGroup('group-min', e, index)}></input>
-                                                <input className='form-control count-sum' placeholder='Max' value={modSearch[index].max} onChange={(e) => this.updateModGroup('group-max', e, index)}></input>
+                                                <input className='form-control count-sum' placeholder='Min' value={modSearch[index].min} onChange={(e) => this.updateModGroup('group-min', e, index)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                                <input className='form-control count-sum' placeholder='Max' value={modSearch[index].max} onChange={(e) => this.updateModGroup('group-max', e, index)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
                                             </div>}
                                     </div>
                                     <div className='col'></div>
                                     <div className='col-auto btn-group' role='group'>
-                                        <button className='btn btn-outline-success' onClick={() => this.updateModGroup('add', null, index)}>{`+`}</button>
-                                        <button className='btn btn-outline-danger' onClick={() => this.removeModGroup(index)}>{`-`/*&#U+1F5D1*/}</button>
+                                        <button className='btn btn-outline-success' onClick={() => this.updateModGroup('add', null, index)} alt={`Add modifier to group ${index}`}>{`+`}</button>
+                                        <button className='btn btn-outline-danger' onClick={() => this.removeModGroup(index)} alt={`Remove modifier group ${index}`}>{`-`/*&#U+1F5D1*/}</button>
                                     </div>
                                 </div>
                                 {index !== modSearch.length - 1 ? <hr></hr> : null}
@@ -300,7 +300,7 @@ class SearchForm extends Component {
                         <div className='row'>
                             <div className='col'></div>
                             <div className='col-auto'>
-                                <button className='btn btn-outline-info' onClick={() => this.createNewModGroup()}>{`+`}</button>
+                                <button className='btn btn-outline-info' onClick={() => this.createNewModGroup()} alt={`Create new modifier group`}>{`+`}</button>
                             </div>
                         </div>
                     </div>
