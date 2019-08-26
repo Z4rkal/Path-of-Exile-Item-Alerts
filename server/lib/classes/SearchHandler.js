@@ -49,17 +49,19 @@ class SearchHandler {
             });
 
             //Remove empty mod groups
-            const tempGroups = searchParams.modGroups;
-            tempGroups.map((group, index) => {
-                group.modifiers.map((modifier, modIndex) => {
-                    if (modifier.text === null || modifier.text === '' || typeof modifier.text !== 'string')
-                        searchParams.modGroups[index].modifiers.splice(modIndex, 1)
+            if (searchParams.modGroups) {
+                const tempGroups = searchParams.modGroups;
+                tempGroups.map((group, index) => {
+                    group.modifiers.map((modifier, modIndex) => {
+                        if (modifier.text === null || modifier.text === '' || typeof modifier.text !== 'string')
+                            searchParams.modGroups[index].modifiers.splice(modIndex, 1)
+                    });
+                    if (group.modifiers.length === 0 || searchParams.modGroups[index].modifiers.length === 0)
+                        searchParams.modGroups.splice(index, 1);
                 });
-                if (group.modifiers.length === 0 || searchParams.modGroups[index].modifiers.length === 0)
-                    searchParams.modGroups.splice(index, 1);
-            });
-            if (searchParams.modGroups.length === 0)
-                delete searchParams.modGroups;
+                if (searchParams.modGroups.length === 0)
+                    delete searchParams.modGroups;
+            }
 
             //Then validate the remaining input for safety
             Object.entries(searchParams).forEach(([param, el]) => {
