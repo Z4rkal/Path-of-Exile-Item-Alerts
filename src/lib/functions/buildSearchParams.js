@@ -1,10 +1,5 @@
-//This will be a function that converts the value of our search form into data for SearchHandler.js on the backend
-
 function buildSearchParams(params) {
-    //Build the searchParams object, probably a better way to do this 
-    //because right now I have to add a parameter to three different files 
-    //whenever I add a new one
-    let searchParams = {
+    let searchParams = { //Clone the simple parameters
         name: params.name,
         type: params.type,
         base: params.base,
@@ -16,12 +11,30 @@ function buildSearchParams(params) {
         iLvl: [params.iLvl[0], params.iLvl[1]],
         tier: [params.tier[0], params.tier[1]],
         quality: [params.quality[0], params.quality[1]],
-        modGroups: [...params.modSearch]
+        modGroups: []
     };
 
-    //Get rid of empty fields before returning it
+    //Clone the modSearch parameter
+    params.modSearch.map((group, index) => {
+        searchParams.modGroups[index] = {
+            modifiers: [],
+            type: group.type,
+            min: group.min,
+            max: group.max
+        };
+
+        group.modifiers.map((modifier, modIndex) => {
+            searchParams.modGroups[index].modifiers[modIndex] = {
+                text: modifier.text,
+                min: modifier.min,
+                max: modifier.max
+            };
+        })
+    });
+
+    //Get rid of empty fields
     Object.entries(searchParams).forEach(([param, el]) => {
-        if (param != 'modGroups') {
+        if (param !== 'modGroups') {
             if (
                 el === null
                 || el === ''
@@ -37,16 +50,26 @@ function buildSearchParams(params) {
         }
     });
 
-    //Remove empty mod groups
-    const tempGroups = searchParams.modGroups;
-    tempGroups.map((group, index) => {
-        group.modifiers.map((modifier, modIndex) => {
-            if (modifier.text === null || modifier.text === '' || typeof modifier.text !== 'string')
-                searchParams.modGroups[index].modifiers.splice(modIndex, 1)
-        });
-        if (group.modifiers.length === 0 || searchParams.modGroups[index].modifiers.length === 0)
-            searchParams.modGroups.splice(index, 1);
-    });
+    //Get rid of empty modifiers and modifier groups
+    for (let n = 0; n < searchParams.modGroups.length; n++) {
+        for (let i = 0; i < searchParams.modGroups[n].modifiers.length; i++) {
+            if (!searchParams.modGroups[n].modifiers[i].text
+                || typeof searchParams.modGroups[n].modifiers[i].text !== 'string'
+                || /^ +$/.test(searchParams.modGroups[n].modifiers[i].text)) {
+                searchParams.modGroups[n].modifiers.splice(i, 1);
+                i--;
+            }
+            else if (searchParams.modGroups[n].modifiers[i].text && /^ +| +$/g.test(searchParams.modGroups[n].modifiers[i].text))
+                searchParams.modGroups[n].modifiers[i].text.replace(/^ +| +$/g, '');
+        }
+
+        if (searchParams.modGroups[n].modifiers.length === 0) {
+            searchParams.modGroups.splice(n, 1);
+            n--;
+        }
+    }
+    
+    //Then delete the entire modGroups parameter if it's empty afterwards
     if (searchParams.modGroups.length === 0)
         delete searchParams.modGroups;
 

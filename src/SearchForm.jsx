@@ -4,6 +4,7 @@ import buildSearchParams from './lib/functions/buildSearchParams';
 class SearchForm extends Component {
     constructor() {
         super();
+
         this.state = {
             name: '',
             type: '',
@@ -139,6 +140,12 @@ class SearchForm extends Component {
         });
     }
 
+    handlePreSubmit() {
+        let searchObj = buildSearchParams(this.state);
+
+        this.props.handleSubmit(searchObj);
+    }
+
     render() {
         const { name, type, base, sockets, links, corrupted, shaperElder, rarity, iLvl, tier, quality, modSearch } = this.state;
 
@@ -146,21 +153,21 @@ class SearchForm extends Component {
             <div className='card bg-light'>
                 <div className='card-body'>
                     <label htmlFor='search-bar' className='control-label'>Enter the name of the item you would like to watch for:</label>
-                    <input id='search-bar' className='form-control' type='text' value={name} onChange={(e) => this.updateInput('name', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                    <input id='search-bar' className='form-control' type='text' value={name} onChange={(e) => this.updateInput('name', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                     <div id='advanced-form' className={this.props.advanced ? 'show' : ''} style={{ marginTop: '0.25rem' }}>
                         <label htmlFor='type-bar' className='control-label'>Enter the type of item you would like to watch for:</label>
-                        <input id='type-bar' className='form-control' type='text' value={type} onChange={(e) => this.updateInput('type', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                        <input id='type-bar' className='form-control' type='text' value={type} onChange={(e) => this.updateInput('type', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                         <label htmlFor='base-bar' className='control-label'>Enter the item base you would like to watch for:</label>
-                        <input id='base-bar' className='form-control' type='text' value={base} onChange={(e) => this.updateInput('base', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                        <input id='base-bar' className='form-control' type='text' value={base} onChange={(e) => this.updateInput('base', e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                         <div className='form-group row'>
                             <div className='form-group col-auto'>
                                 <label htmlFor='sockets-bar' className='control-label'>Sockets:</label>
                                 <ul id='sockets-bar' className='list-group list-group-horizontal'>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
-                                        <input style={{ width: '100%', height: '100%' }} type='number' value={sockets[0]} onChange={(e) => this.updateInput('sockets', [e.target.value, sockets[1]])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                        <input style={{ width: '100%', height: '100%' }} type='number' value={sockets[0]} onChange={(e) => this.updateInput('sockets', [e.target.value, sockets[1]])} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                     </li>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
-                                        <input style={{ width: '100%', height: '100%' }} type='number' value={sockets[1]} onChange={(e) => this.updateInput('sockets', [sockets[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                        <input style={{ width: '100%', height: '100%' }} type='number' value={sockets[1]} onChange={(e) => this.updateInput('sockets', [sockets[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                     </li>
                                 </ul>
                             </div>
@@ -168,10 +175,10 @@ class SearchForm extends Component {
                                 <label htmlFor='links-bar' className='control-label'>Links:</label>
                                 <ul id='links-bar' className='list-group list-group-horizontal'>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
-                                        <input style={{ width: '100%', height: '100%' }} type='number' value={links[0]} onChange={(e) => this.updateInput('links', [e.target.value, links[1]])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                        <input style={{ width: '100%', height: '100%' }} type='number' value={links[0]} onChange={(e) => this.updateInput('links', [e.target.value, links[1]])} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                     </li>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
-                                        <input style={{ width: '100%', height: '100%' }} type='number' value={links[1]} onChange={(e) => this.updateInput('links', [links[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                        <input style={{ width: '100%', height: '100%' }} type='number' value={links[1]} onChange={(e) => this.updateInput('links', [links[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                     </li>
                                 </ul>
                             </div>
@@ -179,10 +186,10 @@ class SearchForm extends Component {
                                 <label htmlFor='ilvl-bar' className='control-label'>iLvl:</label>
                                 <ul id='ilvl-bar' className='list-group list-group-horizontal'>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
-                                        <input style={{ width: '100%', height: '100%' }} type='number' value={iLvl[0]} onChange={(e) => this.updateInput('iLvl', [e.target.value, iLvl[1]])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                        <input style={{ width: '100%', height: '100%' }} type='number' value={iLvl[0]} onChange={(e) => this.updateInput('iLvl', [e.target.value, iLvl[1]])} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                     </li>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
-                                        <input style={{ width: '100%', height: '100%' }} type='number' value={iLvl[1]} onChange={(e) => this.updateInput('iLvl', [iLvl[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                        <input style={{ width: '100%', height: '100%' }} type='number' value={iLvl[1]} onChange={(e) => this.updateInput('iLvl', [iLvl[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                     </li>
                                 </ul>
                             </div>
@@ -190,10 +197,10 @@ class SearchForm extends Component {
                                 <label htmlFor='tier-bar' className='control-label'>Tier:</label>
                                 <ul id='tier-bar' className='list-group list-group-horizontal'>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
-                                        <input style={{ width: '100%', height: '100%' }} type='number' value={tier[0]} onChange={(e) => this.updateInput('tier', [e.target.value, tier[1]])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                        <input style={{ width: '100%', height: '100%' }} type='number' value={tier[0]} onChange={(e) => this.updateInput('tier', [e.target.value, tier[1]])} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                     </li>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
-                                        <input style={{ width: '100%', height: '100%' }} type='number' value={tier[1]} onChange={(e) => this.updateInput('tier', [tier[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                        <input style={{ width: '100%', height: '100%' }} type='number' value={tier[1]} onChange={(e) => this.updateInput('tier', [tier[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                     </li>
                                 </ul>
                             </div>
@@ -201,10 +208,10 @@ class SearchForm extends Component {
                                 <label htmlFor='qual-bar' className='control-label'>Quality:</label>
                                 <ul id='qual-bar' className='list-group list-group-horizontal'>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
-                                        <input style={{ width: '100%', height: '100%' }} type='number' value={quality[0]} onChange={(e) => this.updateInput('quality', [e.target.value, quality[1]])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                        <input style={{ width: '100%', height: '100%' }} type='number' value={quality[0]} onChange={(e) => this.updateInput('quality', [e.target.value, quality[1]])} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                     </li>
                                     <li className='list-group-item px-0 py-0' style={{ width: '2rem' }}>
-                                        <input style={{ width: '100%', height: '100%' }} type='number' value={quality[1]} onChange={(e) => this.updateInput('quality', [quality[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                        <input style={{ width: '100%', height: '100%' }} type='number' value={quality[1]} onChange={(e) => this.updateInput('quality', [quality[0], e.target.value])} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                     </li>
                                 </ul>
                             </div>
@@ -258,9 +265,9 @@ class SearchForm extends Component {
                                     {group.modifiers.map((modifier, modIndex) => (
                                         <div className='form-group col-12 mb-1' key={`Mod Group: ${index}, Mod: ${modIndex}`}>
                                             <div className='input-group mb-1'>
-                                                <input className='form-control mod-text' type='text' value={modSearch[index].modifiers[modIndex].text} onChange={(e) => this.updateModGroup('mod-text', e, index, modIndex)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
-                                                <input className='form-control mod-value' type='text' placeholder='Min' value={modSearch[index].modifiers[modIndex].min} onChange={(e) => this.updateModGroup('mod-min', e, index, modIndex)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
-                                                <input className='form-control mod-value' type='text' placeholder='Max' value={modSearch[index].modifiers[modIndex].max} onChange={(e) => this.updateModGroup('mod-max', e, index, modIndex)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                                <input className='form-control mod-text' type='text' value={modSearch[index].modifiers[modIndex].text} onChange={(e) => this.updateModGroup('mod-text', e, index, modIndex)} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
+                                                <input className='form-control mod-value' type='text' placeholder='Min' value={modSearch[index].modifiers[modIndex].min} onChange={(e) => this.updateModGroup('mod-min', e, index, modIndex)} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
+                                                <input className='form-control mod-value' type='text' placeholder='Max' value={modSearch[index].modifiers[modIndex].max} onChange={(e) => this.updateModGroup('mod-max', e, index, modIndex)} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                                 <div className='input-group-append'>
                                                     <button className='btn btn-outline-danger' onClick={() => this.updateModGroup('remove', null, index, modIndex)}>{`-`/*&#U+1F5D1*/}</button>
                                                 </div>
@@ -284,8 +291,8 @@ class SearchForm extends Component {
                                                     <option value={'count'}>Count</option>
                                                     <option value={'not'}>Not</option>
                                                 </select>
-                                                <input className='form-control count-sum' placeholder='Min' value={modSearch[index].min} onChange={(e) => this.updateModGroup('group-min', e, index)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
-                                                <input className='form-control count-sum' placeholder='Max' value={modSearch[index].max} onChange={(e) => this.updateModGroup('group-max', e, index)} onKeyDown={(e) => { if (e.key === 'Enter') this.props.handleSubmit(buildSearchParams(this.state)); }}></input>
+                                                <input className='form-control count-sum' placeholder='Min' value={modSearch[index].min} onChange={(e) => this.updateModGroup('group-min', e, index)} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
+                                                <input className='form-control count-sum' placeholder='Max' value={modSearch[index].max} onChange={(e) => this.updateModGroup('group-max', e, index)} onKeyDown={(e) => { if (e.key === 'Enter') this.handlePreSubmit(); }}></input>
                                             </div>}
                                     </div>
                                     <div className='col'></div>
@@ -306,7 +313,7 @@ class SearchForm extends Component {
                     </div>
                 </div>
                 <div className='card-footer'>
-                    <button className='btn btn-success btn-block' onClick={() => this.props.handleSubmit(buildSearchParams(this.state))}>Search</button>
+                    <button className='btn btn-success btn-block' onClick={() => this.handlePreSubmit()}>Search</button>
                 </div>
             </div>
         )

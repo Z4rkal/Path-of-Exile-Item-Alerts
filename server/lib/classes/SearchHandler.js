@@ -48,20 +48,28 @@ class SearchHandler {
                 }
             });
 
-            //Remove empty mod groups
-            if (searchParams.modGroups) {
-                const tempGroups = searchParams.modGroups;
-                tempGroups.map((group, index) => {
-                    group.modifiers.map((modifier, modIndex) => {
-                        if (modifier.text === null || modifier.text === '' || typeof modifier.text !== 'string')
-                            searchParams.modGroups[index].modifiers.splice(modIndex, 1)
-                    });
-                    if (group.modifiers.length === 0 || searchParams.modGroups[index].modifiers.length === 0)
-                        searchParams.modGroups.splice(index, 1);
-                });
-                if (searchParams.modGroups.length === 0)
-                    delete searchParams.modGroups;
+            //Get rid of empty modifiers and modifier groups
+            for (let n = 0; n < searchParams.modGroups.length; n++) {
+                for (let i = 0; i < searchParams.modGroups[n].modifiers.length; i++) {
+                    if (!searchParams.modGroups[n].modifiers[i].text
+                        || typeof searchParams.modGroups[n].modifiers[i].text !== 'string'
+                        || /^ +$/.test(searchParams.modGroups[n].modifiers[i].text)) {
+                        searchParams.modGroups[n].modifiers.splice(i, 1);
+                        i--;
+                    }
+                    else if (searchParams.modGroups[n].modifiers[i].text && /^ +| +$/g.test(searchParams.modGroups[n].modifiers[i].text))
+                        searchParams.modGroups[n].modifiers[i].text.replace(/^ +| +$/g, '');
+                }
+
+                if (searchParams.modGroups[n].modifiers.length === 0) {
+                    searchParams.modGroups.splice(n, 1);
+                    n--;
+                }
             }
+
+            //Then delete the entire modGroups parameter if it's empty afterwards
+            if (searchParams.modGroups.length === 0)
+                delete searchParams.modGroups;
 
             //Then validate the remaining input for safety
             Object.entries(searchParams).forEach(([param, el]) => {
@@ -316,7 +324,7 @@ class SearchHandler {
             }
 
             //Once this is thoroughly tested we can get rid of these try/catch blocks around each statement, but for now this reports on any errors in the resulting code
-            a += `\n} catch(error) {\n\tconsole.log('!!!!!!!!!!');\n\tconsole.log(\`Param: ${param}, Element: ${el}\`);\n\tconsole.log(\`Error: \${error}\`);\n\treturn false;\n}\n`
+            a += `\n} catch(error) {\n\tconsole.log('!!!!!!!!!!');\n\tconsole.log(\`Param: ${param}, Element: ${el}\`);\n\tconsole.log(\`Error: \${JSON.stringify(error)}\`);\n\treturn false;\n}\n`
 
             return a;
         }, '');
