@@ -48,28 +48,31 @@ class SearchHandler {
                 }
             });
 
-            //Get rid of empty modifiers and modifier groups
-            for (let n = 0; n < searchParams.modGroups.length; n++) {
-                for (let i = 0; i < searchParams.modGroups[n].modifiers.length; i++) {
-                    if (!searchParams.modGroups[n].modifiers[i].text
-                        || typeof searchParams.modGroups[n].modifiers[i].text !== 'string'
-                        || /^ +$/.test(searchParams.modGroups[n].modifiers[i].text)) {
-                        searchParams.modGroups[n].modifiers.splice(i, 1);
-                        i--;
+            if (searchParams.modGroups && typeof searchParams.modGroups === 'object') {
+                //Get rid of empty modifiers and modifier groups
+                for (let n = 0; n < searchParams.modGroups.length; n++) {
+                    for (let i = 0; i < searchParams.modGroups[n].modifiers.length; i++) {
+                        if (!searchParams.modGroups[n].modifiers[i].text
+                            || typeof searchParams.modGroups[n].modifiers[i].text !== 'string'
+                            || /^ +$/.test(searchParams.modGroups[n].modifiers[i].text)) {
+                            searchParams.modGroups[n].modifiers.splice(i, 1);
+                            i--;
+                        }
+                        else if (/^ +| +$/g.test(searchParams.modGroups[n].modifiers[i].text))
+                            searchParams.modGroups[n].modifiers[i].text = searchParams.modGroups[n].modifiers[i].text.replace(/^\ +|\ +$/g, '');
                     }
-                    else if (searchParams.modGroups[n].modifiers[i].text && /^ +| +$/g.test(searchParams.modGroups[n].modifiers[i].text))
-                        searchParams.modGroups[n].modifiers[i].text.replace(/^ +| +$/g, '');
+
+                    if (searchParams.modGroups[n].modifiers.length === 0) {
+                        searchParams.modGroups.splice(n, 1);
+                        n--;
+                    }
                 }
 
-                if (searchParams.modGroups[n].modifiers.length === 0) {
-                    searchParams.modGroups.splice(n, 1);
-                    n--;
-                }
+                //Then delete the entire modGroups parameter if it's empty afterwards
+                if (searchParams.modGroups.length === 0)
+                    delete searchParams.modGroups;
             }
 
-            //Then delete the entire modGroups parameter if it's empty afterwards
-            if (searchParams.modGroups.length === 0)
-                delete searchParams.modGroups;
 
             //Then validate the remaining input for safety
             Object.entries(searchParams).forEach(([param, el]) => {

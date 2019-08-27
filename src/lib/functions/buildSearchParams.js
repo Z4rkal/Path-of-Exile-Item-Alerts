@@ -59,8 +59,8 @@ function buildSearchParams(params) {
                 searchParams.modGroups[n].modifiers.splice(i, 1);
                 i--;
             }
-            else if (searchParams.modGroups[n].modifiers[i].text && /^ +| +$/g.test(searchParams.modGroups[n].modifiers[i].text))
-                searchParams.modGroups[n].modifiers[i].text.replace(/^ +| +$/g, '');
+            else if (/^ +| +$/g.test(searchParams.modGroups[n].modifiers[i].text))
+                searchParams.modGroups[n].modifiers[i].text = searchParams.modGroups[n].modifiers[i].text.replace(/^\ +|\ +$/g, '');
         }
 
         if (searchParams.modGroups[n].modifiers.length === 0) {
@@ -68,7 +68,7 @@ function buildSearchParams(params) {
             n--;
         }
     }
-    
+
     //Then delete the entire modGroups parameter if it's empty afterwards
     if (searchParams.modGroups.length === 0)
         delete searchParams.modGroups;
