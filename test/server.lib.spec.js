@@ -178,10 +178,13 @@ describe('DataHandler Class with simple name searching', () => {
         DH.setWatch = { name: 'Voidfletcher' };
         await DH.fetchFreshId();
 
+        const start = new Date().valueOf();
         for (let i = 0; i < 5; i++) {
             await DH.getStashData();
             if (!DH.ready) i--;
         }
+        const elapsed = new Date().valueOf() - start;
+        console.log(`\x1b[0m%s\x1b[35m%s\x1b[0m%s`, `\n\nParsing all 5 chunks took `, `${elapsed / 1000}`, ` seconds!\n\n`);
         expect(DH.getId).to.equal('447010984-463577428-436919073-500591734-475196036');
         expect(Object.entries(DH.stashTabs).length).to.not.equal(0);
         expect(Object.entries(Object.entries(DH.stashTabs)[0][1].matches)[0][1].name).to.equal('Voidfletcher');

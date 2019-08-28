@@ -27,8 +27,9 @@ describe('App Component', () => {
     });
 
     it('App should have a function for updating the state when an input changes', () => {
-        expect(wrapper.instance().updateInput('search','Voidfletcher'),'Updating the search field to read \'Voidfletcher\'').to.not.throw;
-        expect(wrapper.state('search'),'Checking that the state was updated properly').to.equal('Voidfletcher');
+        expect(wrapper.state('sortStyle')).to.equal('age');
+        expect(wrapper.instance().updateInput('sortStyle','price'),'Updating sort style to price').to.not.throw;
+        expect(wrapper.state('sortStyle'),'Checking that the state was updated properly').to.equal('price');
     });
 
     it(`App should have functions for handling data titled 'initializeData' and 'handleNewData'`, () => {
