@@ -17,6 +17,7 @@ class DataHandler {
         this.ready = true; //Variable for holding off on getting the next chunk of data until we're done parsing this one.
         this.league = null; //The current league
         this.refreshRate = 1000 * 1; //1 second between checking if we're ready to get the next chunk of stash tabs
+        this.timeOfLastRequest = 0;
         this.watchFor = this.searchHandler.getSearchFunc; //The search parameter, will eventually get replaced with a class since right now this only matches item names
 
         //Stash Data Variables
@@ -126,20 +127,28 @@ class DataHandler {
     //Or look at the mock data I wrote in the test/lib folder
     getStashData() { //Fetches the next chunk of stash data and then hands it to the parseNewData method
         if (this.ready && this.watchFor != null && this.nextChangeId != null) {
+            const NOW = new Date().valueOf();
+            if (this.timeOfLastRequest) {
+                console.log(`\x1b[0m%s\x1b[32m%s\x1b[0m%s\x1b[35m%s\x1b[0m%s`, `Making GET request to https://www.pathofexile.com/api/public-stash-tabs?id=`, `${this.nextChangeId}`, ` after `, `${((NOW - this.timeOfLastRequest) / 1000).toFixed(3)}`, ` seconds`);
+            }
+            else {
+                console.log(`\x1b[0m%s\x1b[32m%s\x1b[0m`, `Making GET request to https://www.pathofexile.com/api/public-stash-tabs?id=`, `${this.nextChangeId}`);
+            }
+            this.timeOfLastRequest = NOW;
             this.ready = false;
-            console.log(`Making GET request to ${`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`}`);
+
             return axios.get(`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`)
-                .then(response => this.ready = this.parseNewData(response.data), error => { console.log('Failed to get stash data'); this.ready = true; });
+                .then(response => this.ready = this.parseNewData(response.data), error => { console.log(`\x1b[33m%s\x1b[31m%s\x1b[0m`, `${error.response.status} `, `Failed to get stash data`); this.ready = true; });
         }
     }
 
     parseNewData(data) { //Parses stash tab data passed to it
-        console.log('Received data');
         const start = new Date().valueOf();
+        console.log(`\n\x1b[0m%s\x1b[36m%s\x1b[0m%s`, `Received data after:\t\t`, `${((start - this.timeOfLastRequest) / 1000).toFixed(3)}`, ` seconds`);
         //If the next id in the data is new, then parse the data since it's a new chunk,
         //otherwise we're at the end of the stream and we need to wait for the next chunk
         if (this.nextChangeId == null || this.nextChangeId != data.next_change_id) {
-            console.log(`Next change ID: ${data.next_change_id}`);
+            console.log(`\x1b[0m%s\x1b[32m%s\x1b[0m`, `Next change ID: `, `${data.next_change_id}`);
             this.nextChangeId = data.next_change_id;
             if (this.watchFor != null) { //If we have a search term
                 data.stashes.forEach((element) => { //Then go through each stash in the data chunk
@@ -152,11 +161,11 @@ class DataHandler {
                     }
                 });
             }
+            const elapsed = new Date().valueOf() - start;
+            console.log(`\x1b[0m%s\x1b[36m%s\x1b[0m%s`, `Finished parsing chunk in:\t`, `~${(elapsed / 1000).toFixed(3)}`, ` seconds`);
         }
-        else console.log(`Reached the end of the stream, waiting for new chunk`);
+        else console.log(`\x1b[33m%s\x1b[0m`, `Reached the end of the stream, waiting for new chunk`);
 
-        const elapsed = new Date().valueOf() - start;
-        console.log(`Finished parsing chunk in ${elapsed / 1000} seconds`);
         return true; //Return true so that getStashData can make another request
     }
 
