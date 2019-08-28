@@ -135,6 +135,7 @@ class DataHandler {
 
     parseNewData(data) { //Parses stash tab data passed to it
         console.log('Received data');
+        const start = new Date().valueOf();
         //If the next id in the data is new, then parse the data since it's a new chunk,
         //otherwise we're at the end of the stream and we need to wait for the next chunk
         if (this.nextChangeId == null || this.nextChangeId != data.next_change_id) {
@@ -153,6 +154,9 @@ class DataHandler {
             }
         }
         else console.log(`Reached the end of the stream, waiting for new chunk`);
+
+        const elapsed = new Date().valueOf() - start;
+        console.log(`Finished parsing chunk in ${elapsed / 1000} seconds`);
         return true; //Return true so that getStashData can make another request
     }
 
