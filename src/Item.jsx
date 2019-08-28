@@ -124,7 +124,7 @@ class Item extends Component {
                                 {this.props.listing.item.shaperElder ? (<span style={this.props.listing.item.shaperElder == 'shaper' ? { backgroundColor: '#9a669a', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' } : { backgroundColor: '#444444', margin: 'auto 0.8rem auto auto', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>{this.props.listing.item.shaperElder == 'shaper' ? `Shaped` : `Elder`}</span>) : null}
                                 {this.props.listing.item.name ? (`${this.props.listing.item.name}, ${this.props.listing.item.type}`) : (`${this.props.listing.item.type}`)}
                             </p>
-                            <p style={{ textAlign: 'right' }} className='col-xs-auto' onClick={() => this.setSort('age')}><span className='hover'>{formatTime(this.props.listing.item.time)}</span></p>
+                            <p style={{ textAlign: 'right' }} className='col-xs-auto' onClick={() => this.setSort('age')}><span className={`hover${this.props.sortStyle === 'age' ? ` sort-highlight` : ``}`}>{formatTime(this.props.listing.item.time)}</span></p>
                         </div>
                         <div className='row'>
                             <div className='col-xs-auto'>
@@ -136,7 +136,7 @@ class Item extends Component {
                         </div>
                         <div className='row'>
                             <div className='col-xs-auto'>
-                                <p style={{ marginTop: '1rem' }}><span className='hover' onClick={() => this.setSort('price')}>{this.props.listing.item.note}</span> | IGN: {this.props.listing.char} | <a href={`https://www.pathofexile.com/account/view-profile/${this.props.listing.acct}`} style={{ color: '#ff4444' }}>Profile</a>{this.state.whisper != null ? (<span> | <CopyToClipboard text={this.state.whisper} onCopy={() => this.setState({ copied: true })}>{this.state.copied == false ? <span style={{ color: '#ff4444' }}>Whisper</span> : <span style={{ color: '#ff4444' }}>Copied to Clipboard</span>}</CopyToClipboard></span>) : null}</p>
+                                <p style={{ marginTop: '1rem' }}><span className={`hover${this.props.sortStyle === 'price' ? ` sort-highlight` : ``}`} onClick={() => this.setSort('price')}>{this.props.listing.item.note}</span> | IGN: {this.props.listing.char} | <a href={`https://www.pathofexile.com/account/view-profile/${this.props.listing.acct}`} style={{ color: '#ff4444' }}>Profile</a>{this.state.whisper != null ? (<span> | <CopyToClipboard text={this.state.whisper} onCopy={() => this.setState({ copied: true })}>{this.state.copied == false ? <span style={{ color: '#ff4444' }}>Whisper</span> : <span style={{ color: '#ff4444' }}>Copied to Clipboard</span>}</CopyToClipboard></span>) : null}</p>
                             </div>
                         </div>
                     </div>

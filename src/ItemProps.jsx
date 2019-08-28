@@ -9,13 +9,13 @@ class ItemProps extends Component {
     }
 
     matchSortedProp(propName) {
-        if (this.props.prop === propName) return { color: '#f73979' };
-        return {};
+        if (this.props.prop === propName) return ' sort-highlight';
+        return '';
     }
 
     buildPropHtml(property) {
         return (
-            <div className='col-xs-auto hover' key={property.name + ' ' + this.props.id} onClick={() => this.setSortProp(property.name)} style={this.matchSortedProp(property.name)}>
+            <div className={`col-xs-auto hover${this.matchSortedProp(property.name)}`} key={property.name + ' ' + this.props.id} onClick={() => this.setSortProp(property.name)}>
                 <span className='property-label'>{PROPERTY_PRIORITIES_ABBREVIATIONS_AND_ROWS[property.name][1] || property.name}: </span>
                 <span className='property-value'>{property.valueAt20 ? `${property.value} (${property.valueAt20})` : property.value}{property.name === 'Quality' ? `%` : ``}</span>
             </div>

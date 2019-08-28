@@ -21,8 +21,8 @@ class ItemMods extends Component {
     }
 
     matchSortedMod(modifier, type) {
-        if (this.props.mod.pattern.test(modifier) && type == this.props.mod.type) return { color: '#f73979' };
-        return {};
+        if (this.props.mod.pattern.test(modifier) && type == this.props.mod.type) return ' sort-highlight';
+        return '';
     }
 
     setSortMod(rawModStr, type) {
@@ -39,17 +39,17 @@ class ItemMods extends Component {
                 <tbody style={{ minHeight: '6rem' }}>
                     {this.props.modifiers.implicit != undefined ? this.props.modifiers.implicit.map((element, index) => (
                         <tr key={this.props.id + ' ' + element + index}>
-                            <th className='hover' onClick={() => this.setSortMod(element, 'implicit')} style={this.matchSortedMod(element, 'implicit')}>{element}</th>
+                            <th className={`hover${this.matchSortedMod(element, 'implicit')}`} onClick={() => this.setSortMod(element, 'implicit')}>{element}</th>
                         </tr>
                     )) : null}
                     {this.props.modifiers.explicit != undefined ? this.props.modifiers.explicit.map((element, index) => (
                         <tr key={this.props.id + ' ' + element + index}>
-                            <td className='hover' onClick={() => this.setSortMod(element, 'explicit')} style={this.matchSortedMod(element, 'explicit')}>{element}</td>
+                            <td className={`hover${this.matchSortedMod(element, 'explicit')}`} onClick={() => this.setSortMod(element, 'explicit')}>{element}</td>
                         </tr>
                     )) : null}
                     {this.props.modifiers.crafted != undefined ? this.props.modifiers.crafted.map((element, index) => (
                         <tr key={this.props.id + ' ' + element + index}>
-                            <td><span className='half-rem-right' style={{ backgroundColor: '#55c3d3', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>Crafted</span> <span className='hover' onClick={() => this.setSortMod(element, 'crafted')} style={this.matchSortedMod(element, 'crafted')}>{element}</span></td>
+                            <td><span className='half-rem-right' style={{ backgroundColor: '#55c3d3', borderRadius: '2px', padding: '3px', color: '#ffffff' }}>Crafted</span> <span className={`hover${this.matchSortedMod(element, 'crafted')}`} onClick={() => this.setSortMod(element, 'crafted')}>{element}</span></td>
                         </tr>
                     )) : null}
                 </tbody>
