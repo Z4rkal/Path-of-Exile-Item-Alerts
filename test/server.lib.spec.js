@@ -156,7 +156,7 @@ describe('DataHandler Class with simple name searching', () => {
 
     it('The class should have a setter and getter for the \'watchFor\' attribute, and both should work properly', () => {
         expect(DH.setWatch = { name: 'Voidfletcher' }).to.be.ok;
-        expect(DH.getWatch.toString()).to.equal('function anonymous(item\n) {\nlet i;\ntry {\n\tif(!/^Voidfletcher$/i.test(item.name)) return false;\n} catch(error) {\n\tconsole.log(\'!!!!!!!!!!\');\n\tconsole.log(`Param: name, Element: Voidfletcher`);\n\tconsole.log(`Error: ${error}`);\n\treturn false;\n}\n\nreturn true;\n}');
+        expect(DH.getWatch.toString()).to.equal('function anonymous(item,compareToMinMax,extractModValue\n) {\nlet i;\ntry {\n\tif(!/^Voidfletcher$/i.test(item.name)) return false;\n} catch(error) {\n\tconsole.log(\'!!!!!!!!!!\');\n\tconsole.log(`Param: name, Element: Voidfletcher`);\n\tconsole.log(`Error: ${JSON.stringify(error)}`);\n\treturn false;\n}\n\nreturn true;\n}');
     });
 
     it('The class should get the nextChangeId from api.poe.watch/id when a watchFor is set', async () => {
