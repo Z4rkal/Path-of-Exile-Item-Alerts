@@ -17,6 +17,7 @@ class DataHandler {
         this.ready = true; //Variable for holding off on getting the next chunk of data until we're done parsing this one.
         this.league = null; //The current league
         this.refreshRate = 1000 * 1; //1 second between checking if we're ready to get the next chunk of stash tabs
+        this.requestInterval = null;
         this.timeOfLastRequest = 0;
         this.watchFor = this.searchHandler.getSearchFunc; //The search parameter, will eventually get replaced with a class since right now this only matches item names
 
@@ -120,7 +121,11 @@ class DataHandler {
     }
 
     spinUp() { //Sets up an interval for fetching the next chunk of stash data from GGG
-        setInterval(() => this.getStashData(), this.refreshRate);
+        this.requestInterval = setInterval(() => this.getStashData(), this.refreshRate);
+    }
+
+    spinDown() { //Unused
+        clearInterval(this.requestInterval);
     }
 
     //If you want a reference for the structure of the data getStashData() is pulling in, you can either go to https://www.pathofexile.com/api/public-stash-tabs
@@ -128,6 +133,11 @@ class DataHandler {
     getStashData() { //Fetches the next chunk of stash data and then hands it to the parseNewData method
         if (this.ready && this.watchFor != null && this.nextChangeId != null) {
             const NOW = new Date().valueOf();
+
+            //We're only allowed to hit the trade API once every second at most
+            if (this.timeOfLastRequest && (NOW - this.timeOfLastRequest) < 1000 && process.env.NODE_ENV !== 'TEST')
+                throw new Error(`Attempted to make another API request too soon! Requests should be made no faster than once per second, but it's only been ${((NOW - this.timeOfLastRequest) / 1000).toFixed(3)} seconds!`);
+
             if (this.timeOfLastRequest) {
                 console.log(`\x1b[0m%s\x1b[32m%s\x1b[0m%s\x1b[35m%s\x1b[0m%s`, `Making GET request to https://www.pathofexile.com/api/public-stash-tabs?id=`, `${this.nextChangeId}`, ` after `, `${((NOW - this.timeOfLastRequest) / 1000).toFixed(3)}`, ` seconds`);
             }
@@ -138,7 +148,20 @@ class DataHandler {
             this.ready = false;
 
             return axios.get(`https://www.pathofexile.com/api/public-stash-tabs?id=${this.nextChangeId}`)
-                .then(response => this.ready = this.parseNewData(response.data), error => { console.log(`\x1b[33m%s\x1b[31m%s\x1b[0m`, `${error.response.status} `, `Failed to get stash data`); this.ready = true; });
+                .then(response => {
+                    if (this.requestInterval && this.requestInterval._repeat > this.refreshRate)
+                        this.requestInterval._repeat = this.refreshRate;
+
+                    this.ready = this.parseNewData(response.data);
+                    return this.ready;
+                }, error => {
+                    //Slow down the requests so that we don't spam the server when it's down for maintenance or having trouble
+                    if (this.requestInterval && this.requestInterval._repeat < this.refreshRate * 30)
+                        this.requestInterval._repeat += this.refreshRate * 1;
+
+                    console.log(`\x1b[33m%s\x1b[31m%s\x1b[0m`, `${error.response.status} `, `Failed to get stash data`);
+                    this.ready = true;
+                });
         }
     }
 
