@@ -62,7 +62,7 @@ describe('DataHandler Class with simple name searching', () => {
         DH.setId = 'mock-1';
         DH.setWatch = { name: 'Voidfletcher' };
 
-        await DH.getStashData();
+        await DH.getStashData(); //Chunk 1
         let i = false;
         while (!i) i = DH.ready; //Wait until the data is done being parsed
         expect(DH.getId).to.equal('mock-2');
@@ -79,7 +79,7 @@ describe('DataHandler Class with simple name searching', () => {
             return tab;
         }));
 
-        await DH.getStashData();
+        await DH.getStashData(); //Chunk 2
         i = false;
         while (!i) i = DH.ready; //Wait until the data is done being parsed
         expect(DH.getId).to.equal('mock-3');
@@ -94,7 +94,7 @@ describe('DataHandler Class with simple name searching', () => {
 
         expect(updatedTabs).to.equal(initialStashes); //Should be no change so check that everything is the same
 
-        await DH.getStashData();
+        await DH.getStashData(); //Chunk 3
         i = false;
         while (!i) i = DH.ready; //Wait until the data is done being parsed
         expect(DH.getId).to.equal('mock-4');
@@ -106,7 +106,7 @@ describe('DataHandler Class with simple name searching', () => {
         expect(DH.nextData.removed.length).to.equal(0);
         expect(DH.nextData.added.length).to.equal(2);
 
-        await DH.getStashData();
+        await DH.getStashData(); //Chunk 4
         i = false;
         while (!i) i = DH.ready; //Wait until the data is done being parsed
         expect(DH.getId).to.equal('mock-5');
@@ -116,7 +116,10 @@ describe('DataHandler Class with simple name searching', () => {
             return a + Object.entries(tab.matches).length;
         }, 0)).to.equal(4);
 
-        await DH.getStashData();
+        expect(DH.nextData.removed.length).to.equal(0);
+        expect(DH.nextData.added.length).to.equal(4);
+
+        await DH.getStashData(); //Chunk 5
         i = false;
         while (!i) i = DH.ready; //Wait until the data is done being parsed
         expect(DH.getId).to.equal('mock-6');
@@ -125,6 +128,92 @@ describe('DataHandler Class with simple name searching', () => {
         expect(DH.nextData.added.length).to.equal(0);
         expect(DH.nextData.removed.length).to.equal(0);
 
-        //TODO: Write the last 4 parts of this test
+        await DH.getStashData(); //Chunk 6
+        i = false;
+        while (!i) i = DH.ready; //Wait until the data is done being parsed
+        expect(DH.getId).to.equal('mock-7');
+
+        expect(Object.entries(DH.stashTabs).length).to.equal(2);
+        expect(Object.entries(DH.stashTabs).reduce((a, [, tab]) => {
+            return a + Object.entries(tab.matches).length;
+        }, 0)).to.equal(4);
+
+        expect(DH.nextData.removed.length).to.equal(0);
+        expect(DH.nextData.added.length).to.equal(4);
+
+        const toSend = DH.nextData;
+        expect(DH.getData).to.eq(toSend);
+
+        //Stashtabs shouldn't change after using DH.getData
+        expect(Object.entries(DH.stashTabs).length).to.equal(2);
+        expect(Object.entries(DH.stashTabs).reduce((a, [, tab]) => {
+            return a + Object.entries(tab.matches).length;
+        }, 0)).to.equal(4);
+
+        expect(DH.nextData.removed.length).to.equal(0);
+        expect(DH.nextData.added.length).to.equal(0);
+
+        expect(Object.values(Object.values(DH.stashTabs)[0].matches)[0].id).to.equal('c8895eb54aa00e5d278583b2e0916bb5902903b7f5946f23ef6e19dea1043f08');
+
+        await DH.getStashData(); //Chunk 7
+        i = false;
+        while (!i) i = DH.ready; //Wait until the data is done being parsed
+        expect(DH.getId).to.equal('mock-8');
+
+        expect(Object.entries(DH.stashTabs).length).to.equal(2);
+        expect(Object.entries(DH.stashTabs).reduce((a, [, tab]) => {
+            return a + Object.entries(tab.matches).length;
+        }, 0)).to.equal(4);
+
+        expect(Object.values(Object.values(DH.stashTabs)[0].matches)[0].id).to.not.equal('c8895eb54aa00e5d278583b2e0916bb5902903b7f5946f23ef6e19dea1043f08');
+        expect(Object.values(Object.values(DH.stashTabs)[1].matches)[0].id).to.equal('c8895eb54aa00e5d278583b2e0916bb5902903b7f5946f23ef6e19dea1043f08');
+
+        expect(DH.nextData.removed.length).to.equal(4);
+        expect(DH.nextData.added.length).to.equal(4);
+
+        await DH.getStashData(); //Chunk 8
+        i = false;
+        while (!i) i = DH.ready; //Wait until the data is done being parsed
+        expect(DH.getId).to.equal('mock-9');
+
+        //Should still be 2 tabs with 4 total items when a duplicate is added
+        expect(Object.entries(DH.stashTabs).length).to.equal(2);
+        expect(Object.entries(DH.stashTabs).reduce((a, [, tab]) => {
+            return a + Object.entries(tab.matches).length;
+        }, 0)).to.equal(4);
+
+        expect(Object.values(Object.values(DH.stashTabs)[0].matches)[0].id).to.equal('c8895eb54aa00e5d278583b2e0916bb5902903b7f5946f23ef6e19dea1043f07');
+        expect(Object.values(Object.values(DH.stashTabs)[0].matches)[1].id).to.equal('c8895eb54aa00e5d278583b2e0916bb5902903b7f5946f23ef6e19dea104346d');
+        expect(Object.values(Object.values(DH.stashTabs)[0].matches)[2]).to.not.exist;
+
+        expect(DH.nextData.removed.length).to.equal(4);
+        expect(DH.nextData.added.length).to.equal(4);
+
+        await DH.getStashData(); //Chunk 9
+        i = false;
+        while (!i) i = DH.ready; //Wait until the data is done being parsed
+        expect(DH.getId).to.equal('mock-10');
+
+        expect(Object.entries(DH.stashTabs).length).to.equal(2);
+        expect(Object.entries(DH.stashTabs).reduce((a, [, tab]) => {
+            return a + Object.entries(tab.matches).length;
+        }, 0)).to.equal(4);
+
+        //Should be back to where we where when we last called getData
+        expect(DH.nextData.removed.length).to.equal(0);
+        expect(DH.nextData.added.length).to.equal(0);
+
+        await DH.getStashData(); //Chunk 10
+        i = false;
+        while (!i) i = DH.ready; //Wait until the data is done being parsed
+        expect(DH.getId).to.equal('all-done');
+
+        //The tabs object should be empty now, and nextData should show that the 
+        //4 tabs that existed last time we called getData were removed
+        expect(Object.entries(DH.stashTabs).length).to.equal(0);
+        expect(DH.nextData.added.length).to.equal(0);
+        expect(DH.nextData.removed.length).to.equal(4);
+
+        //Hooray, everything seems to be working if we got here
     });
 });
