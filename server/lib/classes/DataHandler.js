@@ -214,7 +214,8 @@ class DataHandler {
                     properties: element.properties ? this.handleItemProperties(element) : undefined,
                     modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                     position: [element.x, element.y],
-                    category: element.category, //Position in the stash tab
+                    category: element.extended.category, //Position in the stash tab
+                    subcategories: element.extended.subcategories,
                     note: price, //The price listing
                     time, //The time that the item was parsed
                     chaos: price != 'Price: N/A' ? calculateRawValue(price, this.cData) : 'N/A' //Use calculateRawValue to determine the value in 'chaos orbs' of the listing
@@ -257,7 +258,8 @@ class DataHandler {
                         properties: element.properties ? this.handleItemProperties(element) : undefined,
                         modifiers: { implicit: element.implicitMods, explicit: element.explicitMods, crafted: element.craftedMods },
                         position: [element.x, element.y],
-                        category: element.category,
+                        category: element.extended.category,
+                        subcategories: element.extended.subcategories,
                         note: price,
                         time,
                         chaos: price != 'Price: N/A' ? calculateRawValue(price, this.cData) : 'N/A'
@@ -349,11 +351,11 @@ class DataHandler {
             return null;
         });
 
-        if (!notablePropValues.quality && (item.category.gems || item.category.armour || item.category.weapons || (item.category.maps && item.category.maps.length === 0))) {
-            notablePropValues.quality = !(item.category.gems || item.category.maps) ? 0 : false;
+        if (!notablePropValues.quality && (item.category === 'gems' || item.category === 'armour' || item.category === 'weapons' || (item.category === 'maps'))) {
+            notablePropValues.quality = !(item.category === 'gems' || item.category === 'maps') ? 0 : false;
             parsedPropertiesToSave.push({ name: 'Quality', value: 0 })
         }
-        else if (!(item.category.armour || item.category.weapons)) {
+        else if (!(item.category === 'armour' || item.category === 'weapons')) {
             notablePropValues.quality = false;
         }
 

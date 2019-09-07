@@ -106,10 +106,10 @@ class Item extends Component {
 
         const ONE_PATTERN = /^one|^dagger|^wand/i;
 
-        let oneHanded = false;
-        if (this.props.listing.item.type === 'Gnarled Branch' || (this.props.listing.item.category && this.props.listing.item.category.weapons && ONE_PATTERN.test(this.props.listing.item.category.weapons)))
+        let oneHanded = false; //Need to update this for new item.category
+        if (this.props.listing.item.type === 'Gnarled Branch' || (this.props.listing.item.category && this.props.listing.item.category === 'weapons' && this.props.listing.item.subcategories.some((sub) => ONE_PATTERN.test(sub))))
             oneHanded = true;
-
+        
         return (
             <li className='list-group-item' key={this.props.listing.item.id}>
                 <div className='row h-100'>

@@ -157,7 +157,7 @@ class SearchHandler {
                     a += `\n\tif(!/^${el}$/i.test(item.name)) return false;`;
                     break;
                 case 'type':
-                    a += `\n\tif(!/${el}/i.test(JSON.stringify(item.category))) return false;`;
+                    a += `\n\tif(!/${el}/i.test(item.extended.category)) return false;`;
                     break;
                 case 'base':
                     a += `\n\tif(!/^${el}$/i.test(item.typeLine)) return false;`;
@@ -209,7 +209,7 @@ class SearchHandler {
                 case 'rarity':
                     switch (el) {
                         case 'normal':
-                            a += `\n\tif (item.frameType != 0 || Object.keys(item.category)[1] == 'currency') return false;`
+                            a += `\n\tif (item.frameType != 0 || item.extended.category === 'currency') return false;`
                             break;
                         case 'magic':
                             a += `\n\tif (item.frameType != 1) return false;`
@@ -353,6 +353,10 @@ class SearchHandler {
 }
 
 module.exports = SearchHandler;
+
+
+//All this is outdated, as of Blight League launch on 9/7/19 item.category has been replaced with item.extended
+//item.extended contains a .category property, as well as several new interesting properties such as the number of prefixes and suffixes on the item
 
 /*{ //Example Item
     "verified": false,
