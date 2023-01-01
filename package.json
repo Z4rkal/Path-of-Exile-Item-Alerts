@@ -24,7 +24,7 @@
   "dependencies": {
     "axios": "^0.19.0",
     "babel": "^6.23.0",
-    "babel-loader": "^8.0.6",
+    "babel-loader": "^8.3.0",
     "babel-preset-airbnb": "^4.0.0",
     "babel-preset-react": "^6.24.1",
     "chai": "^4.2.0",
@@ -40,7 +40,7 @@
     "react": "^16.8.6",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.8.6",
-    "webpack": "^4.35.0"
+    "webpack": "^5.75.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
@@ -53,13 +53,13 @@
     "csx": "^9.1.0",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
-    "file-loader": "^4.0.0",
+    "file-loader": "^6.2.0",
     "jsdom": "^15.1.1",
     "jsdom-global": "^3.0.2",
     "mocha": "^6.1.4",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0",
-    "url-loader": "^2.0.1",
-    "webpack-cli": "^3.3.5"
+    "url-loader": "^4.1.1",
+    "webpack-cli": "^5.0.1"
   }
 }
